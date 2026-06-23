@@ -1,0 +1,238 @@
+{
+  "$schema": "./api-catalog.schema.json",
+  "$meta": {
+    "project": "core-cenf-ts",
+    "version": "0.1.0",
+    "description": "CENF Core Infrastructure — 15 transversal managers (TypeScript)",
+    "python_sibling": "github.com/CENFARG/core-cenf-py@v0.1.0",
+    "last_updated": "2026-06-23"
+  },
+  "managers": [
+    {
+      "id": "config",
+      "name": "ConfigManager",
+      "port": "IConfigManager",
+      "description": "Load and validate configuration from environment variables and files",
+      "adapters": ["EnvConfigAdapter", "FileConfigAdapter"],
+      "methods": [
+        { "name": "load", "returns": "T", "params": [{ "name": "schema", "type": "ZodSchema<T>" }] },
+        { "name": "get", "returns": "T | undefined", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "set", "returns": "void", "params": [{ "name": "key", "type": "string" }, { "name": "value", "type": "T" }] },
+        { "name": "reload", "returns": "void", "params": [] }
+      ],
+      "errors": ["ConfigValidationError", "ConfigNotFoundError"],
+      "dependencies": ["ValidationManager"]
+    },
+    {
+      "id": "logging",
+      "name": "LogManager",
+      "port": "ILogManager",
+      "description": "Structured logging with pino",
+      "adapters": ["PinoLogAdapter"],
+      "methods": [
+        { "name": "debug", "returns": "void", "params": [{ "name": "obj", "type": "unknown" }, { "name": "msg", "type": "string", "optional": true }] },
+        { "name": "info", "returns": "void", "params": [{ "name": "obj", "type": "unknown" }, { "name": "msg", "type": "string", "optional": true }] },
+        { "name": "warn", "returns": "void", "params": [{ "name": "obj", "type": "unknown" }, { "name": "msg", "type": "string", "optional": true }] },
+        { "name": "error", "returns": "void", "params": [{ "name": "obj", "type": "unknown" }, { "name": "msg", "type": "string", "optional": true }] },
+        { "name": "fatal", "returns": "void", "params": [{ "name": "obj", "type": "unknown" }, { "name": "msg", "type": "string", "optional": true }] },
+        { "name": "child", "returns": "ILogManager", "params": [{ "name": "bindings", "type": "object" }] }
+      ],
+      "errors": ["LogConfigurationError"],
+      "dependencies": []
+    },
+    {
+      "id": "validation",
+      "name": "ValidationManager",
+      "port": "IValidationManager",
+      "description": "Schema validation with Zod",
+      "adapters": ["ZodValidationAdapter"],
+      "methods": [
+        { "name": "validate", "returns": "T", "params": [{ "name": "schema", "type": "ZodSchema<T>" }, { "name": "data", "type": "unknown" }] },
+        { "name": "validateAsync", "returns": "Promise<T>", "params": [{ "name": "schema", "type": "ZodSchema<T>" }, { "name": "data", "type": "unknown" }] },
+        { "name": "validateArray", "returns": "T[]", "params": [{ "name": "schema", "type": "ZodSchema<T>" }, { "name": "data", "type": "unknown[]" }] }
+      ],
+      "errors": ["ValidationError", "ValidationArrayError"],
+      "dependencies": []
+    },
+    {
+      "id": "cache",
+      "name": "CacheManager",
+      "port": "ICacheManager",
+      "description": "Caching with Redis or in-memory fallback",
+      "adapters": ["RedisCacheAdapter", "MemoryCacheAdapter"],
+      "methods": [
+        { "name": "get", "returns": "Promise<T | undefined>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "set", "returns": "Promise<void>", "params": [{ "name": "key", "type": "string" }, { "name": "value", "type": "T" }, { "name": "ttl", "type": "number", "optional": true }] },
+        { "name": "del", "returns": "Promise<boolean>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "exists", "returns": "Promise<boolean>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "clear", "returns": "Promise<void>", "params": [] },
+        { "name": "health", "returns": "Promise<CacheHealth>", "params": [] }
+      ],
+      "errors": ["CacheConnectionError", "CacheOperationError"],
+      "dependencies": []
+    },
+    {
+      "id": "database",
+      "name": "DatabaseManager",
+      "port": "IDatabaseManager",
+      "description": "Database access with Drizzle or Prisma",
+      "adapters": ["DrizzleDatabaseAdapter", "PrismaDatabaseAdapter"],
+      "methods": [
+        { "name": "connect", "returns": "Promise<void>", "params": [] },
+        { "name": "disconnect", "returns": "Promise<void>", "params": [] },
+        { "name": "health", "returns": "Promise<DatabaseHealth>", "params": [] },
+        { "name": "query", "returns": "Promise<T[]>", "params": [{ "name": "query", "type": "string" }, { "name": "params", "type": "unknown[]", "optional": true }] },
+        { "name": "transaction", "returns": "Promise<T>", "params": [{ "name": "fn", "type": "(tx: unknown) => Promise<T>" }] }
+      ],
+      "errors": ["DatabaseConnectionError", "DatabaseQueryError", "DatabaseTransactionError"],
+      "dependencies": []
+    },
+    {
+      "id": "auth",
+      "name": "AuthManager",
+      "port": "IAuthManager",
+      "description": "JWT authentication with jose",
+      "adapters": ["JoseAuthAdapter"],
+      "methods": [
+        { "name": "generateToken", "returns": "Promise<string>", "params": [{ "name": "payload", "type": "TokenPayload" }, { "name": "options", "type": "TokenOptions", "optional": true }] },
+        { "name": "verifyToken", "returns": "Promise<T>", "params": [{ "name": "token", "type": "string" }, { "name": "options", "type": "VerifyOptions", "optional": true }] },
+        { "name": "decodeToken", "returns": "T", "params": [{ "name": "token", "type": "string" }] },
+        { "name": "refreshToken", "returns": "Promise<TokenPair>", "params": [{ "name": "refreshToken", "type": "string" }] }
+      ],
+      "errors": ["TokenExpiredError", "TokenInvalidError", "TokenVerificationError"],
+      "dependencies": []
+    },
+    {
+      "id": "observability",
+      "name": "ObservabilityManager",
+      "port": "IObservabilityManager",
+      "description": "Distributed tracing and metrics with OpenTelemetry",
+      "adapters": ["OpenTelemetryAdapter"],
+      "methods": [
+        { "name": "createSpan", "returns": "Span", "params": [{ "name": "name", "type": "string" }, { "name": "context", "type": "SpanContext", "optional": true }] },
+        { "name": "recordMetric", "returns": "void", "params": [{ "name": "name", "type": "string" }, { "name": "value", "type": "number" }, { "name": "attributes", "type": "MetricAttributes", "optional": true }] },
+        { "name": "recordError", "returns": "void", "params": [{ "name": "error", "type": "Error" }, { "name": "context", "type": "SpanContext", "optional": true }] },
+        { "name": "addEvent", "returns": "void", "params": [{ "name": "name", "type": "string" }, { "name": "attributes", "type": "EventAttributes", "optional": true }] }
+      ],
+      "errors": ["ObservabilityConfigurationError"],
+      "dependencies": []
+    },
+    {
+      "id": "storage",
+      "name": "StorageManager",
+      "port": "IStorageManager",
+      "description": "File storage with S3 or local filesystem",
+      "adapters": ["S3StorageAdapter", "LocalStorageAdapter"],
+      "methods": [
+        { "name": "upload", "returns": "Promise<string>", "params": [{ "name": "key", "type": "string" }, { "name": "data", "type": "Buffer | Readable" }, { "name": "options", "type": "UploadOptions", "optional": true }] },
+        { "name": "download", "returns": "Promise<Buffer>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "delete", "returns": "Promise<void>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "exists", "returns": "Promise<boolean>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "list", "returns": "Promise<string[]>", "params": [{ "name": "prefix", "type": "string" }] }
+      ],
+      "errors": ["StorageUploadError", "StorageDownloadError", "StorageDeleteError"],
+      "dependencies": []
+    },
+    {
+      "id": "circuit-breaker",
+      "name": "CircuitBreakerManager",
+      "port": "ICircuitBreakerManager",
+      "description": "Circuit breaker for resilient external calls",
+      "adapters": ["OpossumCircuitBreakerAdapter"],
+      "methods": [
+        { "name": "call", "returns": "Promise<T>", "params": [{ "name": "name", "type": "string" }, { "name": "fn", "type": "() => Promise<T>" }, { "name": "fallback", "type": "() => Promise<T>", "optional": true }] },
+        { "name": "status", "returns": "CircuitBreakerStatus", "params": [{ "name": "name", "type": "string" }] },
+        { "name": "reset", "returns": "void", "params": [{ "name": "name", "type": "string" }] }
+      ],
+      "errors": ["CircuitBreakerOpenError"],
+      "dependencies": []
+    },
+    {
+      "id": "i18n",
+      "name": "I18nManager",
+      "port": "II18nManager",
+      "description": "Internationalization with i18next",
+      "adapters": ["I18nextAdapter"],
+      "methods": [
+        { "name": "t", "returns": "string", "params": [{ "name": "key", "type": "string" }, { "name": "options", "type": "TranslateOptions", "optional": true }] },
+        { "name": "setLanguage", "returns": "void", "params": [{ "name": "lang", "type": "string" }] },
+        { "name": "getLanguage", "returns": "string", "params": [] },
+        { "name": "addResourceBundle", "returns": "void", "params": [{ "name": "lang", "type": "string" }, { "name": "ns", "type": "string" }, { "name": "resources", "type": "Record<string, unknown>" }] }
+      ],
+      "errors": ["I18nConfigurationError"],
+      "dependencies": []
+    },
+    {
+      "id": "event-bus",
+      "name": "EventBusManager",
+      "port": "IEventBusManager",
+      "description": "Event-driven messaging with NATS",
+      "adapters": ["NatsEventBusAdapter"],
+      "methods": [
+        { "name": "publish", "returns": "Promise<void>", "params": [{ "name": "subject", "type": "string" }, { "name": "data", "type": "T" }] },
+        { "name": "subscribe", "returns": "Promise<string>", "params": [{ "name": "subject", "type": "string" }, { "name": "handler", "type": "(data: T) => Promise<void>" }] },
+        { "name": "unsubscribe", "returns": "Promise<void>", "params": [{ "name": "subscriptionId", "type": "string" }] },
+        { "name": "health", "returns": "Promise<EventBusHealth>", "params": [] }
+      ],
+      "errors": ["EventBusConnectionError", "EventBusPublishError", "EventBusSubscriptionError"],
+      "dependencies": []
+    },
+    {
+      "id": "http-client",
+      "name": "HttpClientManager",
+      "port": "IHttpClientManager",
+      "description": "HTTP client with retry and timeout",
+      "adapters": ["NativeHttpClientAdapter"],
+      "methods": [
+        { "name": "get", "returns": "Promise<HttpResponse<T>>", "params": [{ "name": "url", "type": "string" }, { "name": "options", "type": "RequestOptions", "optional": true }] },
+        { "name": "post", "returns": "Promise<HttpResponse<T>>", "params": [{ "name": "url", "type": "string" }, { "name": "body", "type": "unknown", "optional": true }, { "name": "options", "type": "RequestOptions", "optional": true }] },
+        { "name": "put", "returns": "Promise<HttpResponse<T>>", "params": [{ "name": "url", "type": "string" }, { "name": "body", "type": "unknown", "optional": true }, { "name": "options", "type": "RequestOptions", "optional": true }] },
+        { "name": "patch", "returns": "Promise<HttpResponse<T>>", "params": [{ "name": "url", "type": "string" }, { "name": "body", "type": "unknown", "optional": true }, { "name": "options", "type": "RequestOptions", "optional": true }] },
+        { "name": "delete", "returns": "Promise<HttpResponse<T>>", "params": [{ "name": "url", "type": "string" }, { "name": "options", "type": "RequestOptions", "optional": true }] }
+      ],
+      "errors": ["HttpClientError", "HttpTimeoutError"],
+      "dependencies": []
+    },
+    {
+      "id": "bootstrap",
+      "name": "BootstrapOrchestrator",
+      "port": "IBootstrapOrchestrator",
+      "description": "Lifecycle wiring — register, start, shutdown",
+      "adapters": [],
+      "methods": [
+        { "name": "register", "returns": "void", "params": [{ "name": "priority", "type": "number" }, { "name": "fn", "type": "() => Promise<void>" }] },
+        { "name": "start", "returns": "Promise<void>", "params": [] },
+        { "name": "shutdown", "returns": "Promise<void>", "params": [] }
+      ],
+      "errors": ["BootstrapError", "ShutdownError"],
+      "dependencies": ["LogManager", "ConfigManager", "HealthManager"]
+    },
+    {
+      "id": "health",
+      "name": "HealthManager",
+      "port": "IHealthManager",
+      "description": "Aggregated health checks for all managers",
+      "adapters": [],
+      "methods": [
+        { "name": "register", "returns": "void", "params": [{ "name": "name", "type": "string" }, { "name": "check", "type": "() => Promise<HealthStatus>" }] },
+        { "name": "checkAll", "returns": "Promise<HealthReport>", "params": [] },
+        { "name": "check", "returns": "Promise<HealthStatus>", "params": [{ "name": "name", "type": "string" }] }
+      ],
+      "errors": ["HealthCheckTimeoutError"],
+      "dependencies": []
+    },
+    {
+      "id": "json-serializer",
+      "name": "JsonSerializer",
+      "port": "IJsonSerializer",
+      "description": "JSON serialization with BigInt and Date support",
+      "adapters": ["NativeJsonSerializer"],
+      "methods": [
+        { "name": "serialize", "returns": "string", "params": [{ "name": "data", "type": "T" }, { "name": "options", "type": "SerializeOptions", "optional": true }] },
+        { "name": "deserialize", "returns": "T", "params": [{ "name": "json", "type": "string" }, { "name": "options", "type": "DeserializeOptions", "optional": true }] }
+      ],
+      "errors": ["JsonSerializationError", "JsonDeserializationError"],
+      "dependencies": []
+    }
+  ]
+}

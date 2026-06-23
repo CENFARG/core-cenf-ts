@@ -1,0 +1,48 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript 5.x + Node.js 20+, npm
+  Architecture: Clean Architecture / Hexagonal (Ports & Adapters)
+    — 15 transversal managers ported from Python sibling (core-cenf-py v0.1.0)
+    - Zod (validation), ioredis (cache), Drizzle/Prisma (DB), pino (logging)
+    - jose (JWT), @opentelemetry/api (observability), @aws-sdk/client-s3 (storage)
+    - opossum (circuit breaker), i18next (i18n), vitest (testing)
+    - tsup (building), nats (event bus)
+  Testing: vitest + @vitest/coverage-v8
+  Style: ESLint flat config + Prettier
+
+strict_tdd: true
+
+# Managers NOT ported from Python version:
+# TaskQueue (BullMQ is different), DynamicPrompting (LLM-specific),
+# Alert (native SDKs), Licence (shared REST service),
+# Update (Electron autoUpdater), Permission (casbin different in Node)
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Reference Python sibling patterns where applicable
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Follow Ports & Adapters patterns from core-cenf-py
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - Maximum 400 changed lines per PR slice
+  apply:
+    rules:
+      - Follow existing code patterns
+    tdd: true
+    test_command: "npm test"
+  verify:
+    test_command: "npm test"
+    build_command: "npm run build"
+    coverage_threshold: 80
+  archive:
+    - Warn before merging destructive deltas
+    - Sync delta specs to main spec
