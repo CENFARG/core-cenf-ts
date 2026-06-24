@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { EnvConfigAdapter } from '../adapters/env.adapter.js';
 import { ConfigValidationError } from '../errors.js';

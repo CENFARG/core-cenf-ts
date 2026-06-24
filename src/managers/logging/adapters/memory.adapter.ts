@@ -66,7 +66,7 @@ export class MemoryLogAdapter implements ILogManager {
     const context: Record<string, unknown> = { ...this.bindings };
 
     if (obj instanceof Error) {
-      context.err = {
+      context['err'] = {
         message: obj.message,
         stack: obj.stack,
       };

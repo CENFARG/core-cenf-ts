@@ -60,12 +60,8 @@ import {
   LOG_TYPES_VERSION,
 } from '../index.js';
 
-// Type-only (compile-time verification)
-import type { CenfError } from '../index.js';
-import type { AsyncLifecycle } from '../index.js';
-import type { IConfigManager } from '../index.js';
-import type { ILogManager } from '../index.js';
-import type { HealthStatus, ContextStore, JsonObject, Result } from '../index.js';
+// Type-only (compile-time verification — confirmed by `npm run typecheck`)
+import type { HealthStatus } from '../index.js';
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {

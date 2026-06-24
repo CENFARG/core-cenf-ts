@@ -94,7 +94,7 @@ export class EnvConfigAdapter implements IConfigManager {
     return {
       status: 'healthy',
       details: {
-        env: process.env.NODE_ENV ?? process.env.CENF_ENV ?? 'unknown',
+        env: process.env['NODE_ENV'] ?? process.env['CENF_ENV'] ?? 'unknown',
         keysLoaded: Object.keys(this.store).length,
       },
     };

@@ -88,7 +88,6 @@ export interface ContextStore {
  * @internal Type identity symbol — ensures this module has a runtime presence
  * and can be imported as a value (not just a type).
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 declare const TYPE_BRAND: unique symbol;
 
 /**

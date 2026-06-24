@@ -50,10 +50,8 @@ export {
 // ---------------------------------------------------------------------------
 // Shared: Types
 // ---------------------------------------------------------------------------
-export {
-  JsonValue,
-  JsonValueBrand,
-} from './shared/types.js';
+export { JsonValue } from './shared/types.js';
+export type { JsonValueBrand } from './shared/types.js';
 export type {
   JsonObject,
   Result,
@@ -64,7 +62,8 @@ export type {
 // ---------------------------------------------------------------------------
 // Shared: Lifecycle
 // ---------------------------------------------------------------------------
-export { AsyncLifecycle, LIFECYCLE_VERSION } from './shared/lifecycle.js';
+export type { AsyncLifecycle } from './shared/lifecycle.js';
+export { LIFECYCLE_VERSION } from './shared/lifecycle.js';
 
 // ---------------------------------------------------------------------------
 // Shared: Context
@@ -85,7 +84,8 @@ export type { RetryOptions } from './shared/utils.js';
 // ---------------------------------------------------------------------------
 // ConfigManager
 // ---------------------------------------------------------------------------
-export { IConfigManager, CONFIG_PORT_VERSION } from './managers/config/ports.js';
+export type { IConfigManager } from './managers/config/ports.js';
+export { CONFIG_PORT_VERSION } from './managers/config/ports.js';
 export {
   ConfigValidationError,
   ConfigNotFoundError,
@@ -100,7 +100,8 @@ export {
 // ---------------------------------------------------------------------------
 // LogManager
 // ---------------------------------------------------------------------------
-export { ILogManager, LOG_PORT_VERSION } from './managers/logging/ports.js';
+export type { ILogManager } from './managers/logging/ports.js';
+export { LOG_PORT_VERSION } from './managers/logging/ports.js';
 export {
   LogConfigurationError,
 } from './managers/logging/errors.js';

@@ -5,7 +5,7 @@ import {
   sha256Hash,
   isCenfError,
 } from '../utils.js';
-import { CenfError, ConfigError } from '../errors.js';
+import { ConfigError } from '../errors.js';
 
 describe('retry()', () => {
   it('succeeds on first attempt without retrying', async () => {

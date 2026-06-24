@@ -21,7 +21,7 @@ class TestLogger implements ILogManager {
   fatal(obj: unknown, msg?: string): void {
     this.logs.push({ level: 'fatal', obj, msg });
   }
-  child(bindings: Record<string, unknown>): ILogManager {
+  child(_bindings: Record<string, unknown>): ILogManager {
     const child = new TestLogger();
     return child;
   }
