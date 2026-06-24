@@ -97,15 +97,15 @@ Chain strategy: feature-branch-chain
 
 ### Phase 3.1: ObservabilityManager
 
-- [ ] **TASK_024**: Create `src/managers/observability/ports.ts` + `types.ts` + `errors.ts` — `IObservabilityManager` (`createSpan`, `recordMetric`, `recordError`, `addEvent`), `SpanContext`, `MetricAttributes`, `ObservabilityConfigurationError`. **Lines**: ~45
-- [ ] **TASK_025**: Create `src/managers/observability/adapters/memory.adapter.ts` — `MemoryObservabilityAdapter`. **Test**: → spans captured with attributes, metrics recorded with values, errors attached to span context. **Lines**: ~40 + ~50 tests
-- [ ] **TASK_026**: Create `src/managers/observability/adapters/otel.adapter.ts` — `OpenTelemetryAdapter` wrapping `@opentelemetry/api`. **Test**: → parent span → child span with attributes, span.end() records duration, OTel disabled returns no-op span (graceful degradation), recordMetric counter increments. **Lines**: ~55 + ~60 tests
+- [x] **TASK_024**: Create `src/managers/observability/ports.ts` + `types.ts` + `errors.ts` — `IObservabilityManager` (`createSpan`, `recordMetric`, `recordError`, `addEvent`), `SpanContext`, `MetricAttributes`, `ObservabilityConfigurationError`. **Lines**: ~45
+- [x] **TASK_025**: Create `src/managers/observability/adapters/memory.adapter.ts` — `MemoryObservabilityAdapter`. **Test**: → spans captured with attributes, metrics recorded with values, errors attached to span context. **Lines**: ~40 + ~50 tests
+- [x] **TASK_026**: Create `src/managers/observability/adapters/otel.adapter.ts` — `OpenTelemetryAdapter` wrapping `@opentelemetry/api`. **Test**: → parent span → child span with attributes, span.end() records duration, OTel disabled returns no-op span (graceful degradation), recordMetric counter increments. **Lines**: ~55 + ~60 tests
 
 ### Phase 3.2: AuthManager
 
-- [ ] **TASK_027**: Create `src/managers/auth/ports.ts` + `types.ts` + `errors.ts` — `IAuthManager` (`generateToken`, `verifyToken`, `decodeToken`, `refreshToken`), `TokenPayload`, `TokenOptions`, `TokenPair`, `TokenExpiredError`, `TokenInvalidError`, `TokenVerificationError`. **Lines**: ~50
-- [ ] **TASK_028**: Create `src/managers/auth/adapters/memory.adapter.ts` — `MemoryAuthAdapter`. **Test**: → generate/verify roundtrip, decode without verification, expired token rejection. **Lines**: ~40 + ~50 tests
-- [ ] **TASK_029**: Create `src/managers/auth/adapters/jose.adapter.ts` — `JoseAuthAdapter` wrapping `jose` (HS256/RS256). **Test**: → HS256 sign/verify roundtrip, expired token throws TokenExpiredError, audience mismatch throws TokenVerificationError, refresh returns new TokenPair with future expiresAt. **Lines**: ~60 + ~70 tests
+- [x] **TASK_027**: Create `src/managers/auth/ports.ts` + `types.ts` + `errors.ts` — `IAuthManager` (`generateToken`, `verifyToken`, `decodeToken`, `refreshToken`), `TokenPayload`, `TokenOptions`, `TokenPair`, `TokenExpiredError`, `TokenInvalidError`, `TokenVerificationError`. **Lines**: ~50
+- [x] **TASK_028**: Create `src/managers/auth/adapters/memory.adapter.ts` — `MemoryAuthAdapter`. **Test**: → generate/verify roundtrip, decode without verification, expired token rejection. **Lines**: ~40 + ~50 tests
+- [x] **TASK_029**: Create `src/managers/auth/adapters/jose.adapter.ts` — `JoseAuthAdapter` wrapping `jose` (HS256/RS256). **Test**: → HS256 sign/verify roundtrip, expired token throws TokenExpiredError, audience mismatch throws TokenVerificationError, refresh returns new TokenPair with future expiresAt. **Lines**: ~60 + ~70 tests
 
 ---
 
@@ -113,20 +113,20 @@ Chain strategy: feature-branch-chain
 
 ### Phase 4.1: CacheManager
 
-- [ ] **TASK_030**: Create `src/managers/cache/ports.ts` + `types.ts` + `errors.ts` — `ICacheManager` (`get`, `set`, `del`, `exists`, `clear`, `getOrSet`, `health`), `CacheHealth`, `CacheConnectionError`, `CacheOperationError`. **Lines**: ~45
-- [ ] **TASK_031**: Create `src/managers/cache/adapters/memory.adapter.ts` — `MemoryCacheAdapter` with TTL eviction via interval sweep. **Test**: → set/get with TTL, expired returns undefined, delete idempotent, clear empties all. **Lines**: ~50 + ~55 tests
-- [ ] **TASK_032**: Create `src/managers/cache/adapters/redis.adapter.ts` — `RedisCacheAdapter` wrapping `ioredis` with JSON serialization. **Test**: → PING health, getOrSet with XFetch early recompute near expiry, normal get skips factory, cache miss triggers factory, connection failure → CacheConnectionError. **Lines**: ~60 + ~65 tests
+- [x] **TASK_030**: Create `src/managers/cache/ports.ts` + `types.ts` + `errors.ts` — `CacheManager` (get, set, del, has, clear, getOrSet), `CacheEntry`, `CacheOptions`. **Lines**: ~180 (3 files)
+- [x] **TASK_031**: Create `src/managers/cache/adapters/memory.adapter.ts` — `MemoryCacheAdapter` with TTL, XFetch stampede in getOrSet. **Lines**: ~380 (2 files)
+- [x] **TASK_032**: SKIPPED — RedisCacheAdapter deferred to PR #5 per user architecture (no ioredis in PR #4)
 
 ### Phase 4.2: FeatureFlagManager
 
-- [ ] **TASK_033**: Create `src/managers/feature-flag/ports.ts` + `types.ts` + `errors.ts` — `IFeatureFlagManager` (`isEnabled`, `getVariant`, `reload`), `FeatureFlag`, `FeatureFlagConfig`. **Lines**: ~40
-- [ ] **TASK_034**: Create `src/managers/feature-flag/adapters/memory.adapter.ts` — `MemoryFeatureFlagAdapter`. **Test**: → boolean flag resolution, percentage rollout distribution within tolerance, reload updates flags. **Lines**: ~35 + ~40 tests
-- [ ] **TASK_035**: Create `src/managers/feature-flag/adapters/yaml.adapter.ts` — `YamlFeatureFlagAdapter` loading from YAML file. **Test**: → YAML parse, env override, missing file graceful fallback. **Lines**: ~40 + ~40 tests
+- [x] **TASK_033**: Create `src/managers/feature-flag/ports.ts` + `types.ts` + errors — `FeatureFlagManager` (isEnabled, isEnabledForUser, getAllFlags), `FeatureFlag`, `FlagConfig`, `FeatureFlagError`, `FeatureFlagNotFoundError`. **Lines**: ~270 (4 files incl. shared/errors.ts)
+- [x] **TASK_034**: Create `src/managers/feature-flag/adapters/memory.adapter.ts` — `MemoryFeatureFlagAdapter` with FNV-1a hash percentage rollout. **Lines**: ~356 (2 files)
+- [x] **TASK_035**: SKIPPED — YamlFeatureFlagAdapter not in user architecture for PR #4
 
 ### Phase 4.3: RateLimiterManager
 
-- [ ] **TASK_036**: Create `src/managers/rate-limiter/ports.ts` + `types.ts` + `errors.ts` — `IRateLimiterManager` (`consume`, `reset`, `status`), `TokenBucket`, `RateLimitStatus`. Zero dependencies. **Lines**: ~40
-- [ ] **TASK_037**: Create `src/managers/rate-limiter/adapters/token-bucket.adapter.ts` — `TokenBucketAdapter` with refill interval. **Test**: → consume within limit passes, exceed limit throws, refill restores tokens over time, different keys have independent buckets. **Lines**: ~50 + ~55 tests
+- [x] **TASK_036**: Create `src/managers/rate-limiter/ports.ts` + `types.ts` + error — `RateLimiterManager` (consume, getRemaining, reset), `TokenBucket`, `RateLimitConfig`, `RateLimitResult`, `RateLimitExceededError`. **Lines**: ~300 (3 files)
+- [x] **TASK_037**: Create `src/managers/rate-limiter/adapters/memory.adapter.ts` — `MemoryRateLimiterAdapter` with token bucket, fake timer refill tests. **Lines**: ~504 (2 files)
 
 ---
 
