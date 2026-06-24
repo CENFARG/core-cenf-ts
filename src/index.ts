@@ -244,3 +244,31 @@ export { DATABASE_TYPES_VERSION } from './managers/database/types.js';
 export {
   MemoryDatabaseAdapter,
 } from './managers/database/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// StorageManager
+// ---------------------------------------------------------------------------
+export type { StorageManager } from './managers/storage/ports.js';
+export { STORAGE_PORT_VERSION } from './managers/storage/ports.js';
+export type {
+  StorageObject,
+  StorageMetadata,
+} from './managers/storage/types.js';
+export { STORAGE_TYPES_VERSION } from './managers/storage/types.js';
+export {
+  MemoryStorageAdapter,
+} from './managers/storage/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// HttpClientManager
+// ---------------------------------------------------------------------------
+export type { HttpClientManager } from './managers/http-client/ports.js';
+export { HTTP_CLIENT_PORT_VERSION } from './managers/http-client/ports.js';
+export type {
+  HttpResponse,
+  RequestOptions,
+} from './managers/http-client/types.js';
+export { HTTP_CLIENT_TYPES_VERSION } from './managers/http-client/types.js';
+export {
+  FetchHttpClientAdapter,
+} from './managers/http-client/adapters/fetch.adapter.js';

@@ -111,6 +111,16 @@ import {
   MemoryDatabaseAdapter,
 } from '../index.js';
 import type { DatabaseManager } from '../index.js';
+import {
+  STORAGE_PORT_VERSION,
+  STORAGE_TYPES_VERSION,
+  MemoryStorageAdapter,
+} from '../index.js';
+import {
+  HTTP_CLIENT_PORT_VERSION,
+  HTTP_CLIENT_TYPES_VERSION,
+  FetchHttpClientAdapter,
+} from '../index.js';
 
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
@@ -123,6 +133,8 @@ import type { CacheManager } from '../index.js';
 import type { FeatureFlagManager } from '../index.js';
 import type { RateLimiterManager } from '../index.js';
 import type { DatabaseManager } from '../index.js';
+import type { StorageManager } from '../index.js';
+import type { HttpClientManager } from '../index.js';
 
 // Type-level verification — these are never used at runtime
 void ({} as ISecretManager);
@@ -134,6 +146,8 @@ void ({} as CacheManager);
 void ({} as FeatureFlagManager);
 void ({} as RateLimiterManager);
 void ({} as DatabaseManager);
+void ({} as StorageManager);
+void ({} as HttpClientManager);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -275,5 +289,17 @@ describe('Barrel exports (index.ts)', () => {
     expect(DATABASE_PORT_VERSION).toBe('0.1.0');
     expect(DATABASE_TYPES_VERSION).toBe('0.1.0');
     expect(MemoryDatabaseAdapter).toBeDefined();
+  });
+
+  it('exports StorageManager port (version proxy) and adapter', () => {
+    expect(STORAGE_PORT_VERSION).toBe('0.1.0');
+    expect(STORAGE_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryStorageAdapter).toBeDefined();
+  });
+
+  it('exports HttpClientManager port (version proxy) and adapter', () => {
+    expect(HTTP_CLIENT_PORT_VERSION).toBe('0.1.0');
+    expect(HTTP_CLIENT_TYPES_VERSION).toBe('0.1.0');
+    expect(FetchHttpClientAdapter).toBeDefined();
   });
 });
