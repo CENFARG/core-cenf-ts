@@ -92,6 +92,29 @@ export class CacheOperationError extends CenfError {
 }
 
 // ---------------------------------------------------------------------------
+// Feature flag errors (PR #4)
+// ---------------------------------------------------------------------------
+
+/** Feature flag not found in the configuration. */
+export class FeatureFlagError extends CenfError {
+  readonly code = 'ERR_FEATURE_FLAG';
+}
+
+/** Specific feature flag was not found. */
+export class FeatureFlagNotFoundError extends CenfError {
+  readonly code = 'ERR_FEATURE_FLAG_NOT_FOUND';
+}
+
+// ---------------------------------------------------------------------------
+// Rate limiter errors (PR #4)
+// ---------------------------------------------------------------------------
+
+/** Rate limit exceeded — request denied. */
+export class RateLimitExceededError extends CenfError {
+  readonly code = 'ERR_RATE_LIMIT_EXCEEDED';
+}
+
+// ---------------------------------------------------------------------------
 // Database errors (PR #4 / #5)
 // ---------------------------------------------------------------------------
 
