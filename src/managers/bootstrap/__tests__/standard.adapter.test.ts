@@ -85,8 +85,7 @@ describe('StandardBootstrapAdapter', () => {
 
       // high (1) should start before mid (5), mid before low (10)
       const startOrder: string[] = [];
-      // We can't easily track order with individual counters,
-      // but we verify all started exactly once
+      void startOrder; // acknowledged but unused — verified via startCalls counts
       expect(high.startCalls).toBe(1);
       expect(mid.startCalls).toBe(1);
       expect(low.startCalls).toBe(1);
@@ -136,7 +135,6 @@ describe('StandardBootstrapAdapter', () => {
       const normal = new MockLifecycle();
 
       // Make stop throw
-      const origStop = failing.stop.bind(failing);
       failing.stop = async () => {
         failing.stopCalls++;
         throw new Error('Stop failed');

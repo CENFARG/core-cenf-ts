@@ -90,7 +90,11 @@ export class MemoryI18nAdapter implements I18nManager {
       return key;
     }
 
-    let template = localeResources[key];
+    const rawTemplate = localeResources[key];
+    if (rawTemplate === undefined) {
+      return key;
+    }
+    let template: string = rawTemplate;
 
     // Interpolate {{param}} placeholders
     if (params) {

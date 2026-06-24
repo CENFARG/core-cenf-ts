@@ -8,6 +8,7 @@
  */
 
 import type { ZodSchema } from 'zod';
+import type { AsyncLifecycle } from '../../shared/lifecycle.js';
 import type { Result } from '../../shared/types.js';
 
 /**
@@ -26,11 +27,11 @@ export interface ValidationError {
 /**
  * Schema-based validation manager port.
  *
- * Does NOT extend `AsyncLifecycle` — pure logic with no external dependencies.
+ * Extends `AsyncLifecycle` for uniform orchestration.
  * Wraps Zod's `safeParse` / `safeParseAsync` and returns
  * `Result<T, ValidationError[]>` instead of throwing.
  */
-export interface IValidationManager {
+export interface IValidationManager extends AsyncLifecycle {
   /**
    * Synchronously validate data against a Zod schema.
    *

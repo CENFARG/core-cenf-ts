@@ -166,7 +166,7 @@ export class NativeJsonSerializer implements JsonSerializer {
       return value;
     }
 
-    const [sentinelKey] = keys;
+    const sentinelKey = keys[0]!;
 
     // BigInt sentinel
     if (sentinelKey === BIGINT_KEY && typeof obj[BIGINT_KEY] === 'string') {

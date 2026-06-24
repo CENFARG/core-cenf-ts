@@ -7,13 +7,16 @@
  * @module managers/logging/ports
  */
 
+import type { AsyncLifecycle } from '../../shared/lifecycle.js';
+
 /**
  * Structured logging manager port.
  *
  * Provides five log levels and child logger support.
+ * Extends `AsyncLifecycle` for uniform orchestration.
  * All adapters (pino, memory) implement this interface.
  */
-export interface ILogManager {
+export interface ILogManager extends AsyncLifecycle {
   /** Debug-level log for development diagnostics. */
   debug(obj: unknown, msg?: string): void;
 

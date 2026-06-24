@@ -128,6 +128,42 @@ import {
 } from '../index.js';
 import type { CircuitBreakerManager } from '../index.js';
 
+// PR #6 new managers
+import {
+  EVENT_BUS_PORT_VERSION,
+  EVENT_BUS_TYPES_VERSION,
+  MemoryEventBusAdapter,
+} from '../index.js';
+import type { EventBusManager } from '../index.js';
+
+import {
+  I18N_PORT_VERSION,
+  I18N_TYPES_VERSION,
+  MemoryI18nAdapter,
+} from '../index.js';
+import type { I18nManager } from '../index.js';
+
+import {
+  JSON_SERIALIZER_PORT_VERSION,
+  JSON_SERIALIZER_TYPES_VERSION,
+  NativeJsonSerializer,
+} from '../index.js';
+import type { JsonSerializer } from '../index.js';
+
+import {
+  HEALTH_PORT_VERSION,
+  HEALTH_TYPES_VERSION,
+  AggregatedHealthCheckAdapter,
+} from '../index.js';
+import type { HealthManager } from '../index.js';
+
+import {
+  BOOTSTRAP_PORT_VERSION,
+  BOOTSTRAP_TYPES_VERSION,
+  StandardBootstrapAdapter,
+} from '../index.js';
+import type { BootstrapOrchestrator } from '../index.js';
+
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
 import type { ISecretManager } from '../index.js';
@@ -155,6 +191,11 @@ void ({} as DatabaseManager);
 void ({} as StorageManager);
 void ({} as HttpClientManager);
 void ({} as CircuitBreakerManager);
+void ({} as EventBusManager);
+void ({} as I18nManager);
+void ({} as JsonSerializer);
+void ({} as HealthManager);
+void ({} as BootstrapOrchestrator);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -314,5 +355,35 @@ describe('Barrel exports (index.ts)', () => {
     expect(CIRCUIT_BREAKER_PORT_VERSION).toBe('0.1.0');
     expect(CIRCUIT_BREAKER_TYPES_VERSION).toBe('0.1.0');
     expect(MemoryCircuitBreakerAdapter).toBeDefined();
+  });
+
+  it('exports EventBusManager port (version proxy) and adapter', () => {
+    expect(EVENT_BUS_PORT_VERSION).toBe('0.1.0');
+    expect(EVENT_BUS_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryEventBusAdapter).toBeDefined();
+  });
+
+  it('exports I18nManager port (version proxy) and adapter', () => {
+    expect(I18N_PORT_VERSION).toBe('0.1.0');
+    expect(I18N_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryI18nAdapter).toBeDefined();
+  });
+
+  it('exports JsonSerializer port (version proxy) and adapter', () => {
+    expect(JSON_SERIALIZER_PORT_VERSION).toBe('0.1.0');
+    expect(JSON_SERIALIZER_TYPES_VERSION).toBe('0.1.0');
+    expect(NativeJsonSerializer).toBeDefined();
+  });
+
+  it('exports HealthManager port (version proxy) and adapter', () => {
+    expect(HEALTH_PORT_VERSION).toBe('0.1.0');
+    expect(HEALTH_TYPES_VERSION).toBe('0.1.0');
+    expect(AggregatedHealthCheckAdapter).toBeDefined();
+  });
+
+  it('exports BootstrapOrchestrator port (version proxy) and adapter', () => {
+    expect(BOOTSTRAP_PORT_VERSION).toBe('0.1.0');
+    expect(BOOTSTRAP_TYPES_VERSION).toBe('0.1.0');
+    expect(StandardBootstrapAdapter).toBeDefined();
   });
 });

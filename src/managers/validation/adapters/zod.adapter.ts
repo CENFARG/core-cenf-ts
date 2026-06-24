@@ -9,6 +9,7 @@
 
 import type { ZodSchema } from 'zod';
 import type { Result } from '../../../shared/types.js';
+import type { HealthStatus } from '../../../shared/types.js';
 import type { IValidationManager, ValidationError } from '../ports.js';
 
 /**
@@ -18,6 +19,22 @@ import type { IValidationManager, ValidationError } from '../ports.js';
  * with dot-notation field paths and human-readable messages.
  */
 export class ZodValidationAdapter implements IValidationManager {
+  // -------------------------------------------------------------------
+  // AsyncLifecycle
+  // -------------------------------------------------------------------
+
+  async start(): Promise<void> {
+    // No-op: pure logic adapter requires no initialization
+  }
+
+  async stop(): Promise<void> {
+    // No-op: pure logic adapter requires no cleanup
+  }
+
+  async health(): Promise<HealthStatus> {
+    return { status: 'healthy', details: { adapter: 'zod' } };
+  }
+
   // -------------------------------------------------------------------
   // IValidationManager
   // -------------------------------------------------------------------

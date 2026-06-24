@@ -7,16 +7,17 @@
  * @module managers/error-handling/ports
  */
 
+import type { AsyncLifecycle } from '../../shared/lifecycle.js';
 import type { ErrorClassification, ErrorContext, ErrorReport } from './types.js';
 
 /**
  * Unified error handling manager port.
  *
- * Does NOT extend `AsyncLifecycle` — pure logic with no external dependencies.
+ * Extends `AsyncLifecycle` for uniform orchestration.
  * Implementations classify errors, produce API-safe reports, and wrap
  * functions with automatic error catching and enrichment.
  */
-export interface IErrorHandlingManager {
+export interface IErrorHandlingManager extends AsyncLifecycle {
   /**
    * Process an error and produce a structured report.
    *

@@ -8,6 +8,7 @@
  */
 
 import { isCenfError } from '../../../shared/utils.js';
+import type { HealthStatus } from '../../../shared/types.js';
 import type {
   ErrorCategory,
   ErrorClassification,
@@ -97,6 +98,22 @@ const DEFAULT_CLASSIFICATION: ClassificationRule = {
 export class StandardErrorHandlingAdapter
   implements IErrorHandlingManager
 {
+  // -------------------------------------------------------------------
+  // AsyncLifecycle
+  // -------------------------------------------------------------------
+
+  async start(): Promise<void> {
+    // No-op: pure logic adapter requires no initialization
+  }
+
+  async stop(): Promise<void> {
+    // No-op: pure logic adapter requires no cleanup
+  }
+
+  async health(): Promise<HealthStatus> {
+    return { status: 'healthy', details: { adapter: 'standard' } };
+  }
+
   // -------------------------------------------------------------------
   // IErrorHandlingManager
   // -------------------------------------------------------------------

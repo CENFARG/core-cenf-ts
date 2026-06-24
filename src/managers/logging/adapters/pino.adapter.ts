@@ -10,6 +10,7 @@
 import pino from 'pino';
 import type { Logger, DestinationStream } from 'pino';
 import type { ILogManager } from '../ports.js';
+import type { HealthStatus } from '../../../shared/types.js';
 
 /** Options for configuring the PinoLogAdapter. */
 export interface PinoOptions {
@@ -85,6 +86,18 @@ export class PinoLogAdapter implements ILogManager {
   child(bindings: Record<string, unknown>): ILogManager {
     const childLogger = this.logger.child(bindings);
     return PinoLogAdapter.fromLogger(childLogger);
+  }
+
+  async start(): Promise<void> {
+    // No-op: pino logger is initialized in constructor
+  }
+
+  async stop(): Promise<void> {
+    // No-op: pino logger stream is managed externally
+  }
+
+  async health(): Promise<HealthStatus> {
+    return { status: 'healthy', details: { adapter: 'pino' } };
   }
 
   // -------------------------------------------------------------------

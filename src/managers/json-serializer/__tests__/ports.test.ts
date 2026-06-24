@@ -14,7 +14,7 @@ describe('JsonSerializer port', () => {
   });
 
   it('serialize signature returns string (compile-time)', () => {
-    const fn: JsonSerializer['serialize'] = <T>(_data: T) => '';
+    const fn: JsonSerializer['serialize'] = <_T>(_data: _T) => '';
     expect(typeof fn).toBe('function');
   });
 
@@ -24,7 +24,8 @@ describe('JsonSerializer port', () => {
   });
 
   it('registerSerializer signature accepts type + serializer (compile-time)', () => {
-    const fn: JsonSerializer['registerSerializer'] = <T>(_type, _serializer) => {};
+    const fn: JsonSerializer['registerSerializer'] =
+      ((_type: string, _serializer: unknown) => {}) as JsonSerializer['registerSerializer'];
     expect(typeof fn).toBe('function');
   });
 });

@@ -9,6 +9,7 @@
 
 import type { ILogManager } from '../ports.js';
 import type { LogEntry, LogLevel } from '../types.js';
+import type { HealthStatus } from '../../../shared/types.js';
 
 /**
  * In-memory log adapter that captures entries for test assertions.
@@ -43,6 +44,18 @@ export class MemoryLogAdapter implements ILogManager {
 
   fatal(obj: unknown, msg?: string): void {
     this.record('fatal', obj, msg);
+  }
+
+  async start(): Promise<void> {
+    // No-op: in-memory adapter requires no initialization
+  }
+
+  async stop(): Promise<void> {
+    this.entries.length = 0;
+  }
+
+  async health(): Promise<HealthStatus> {
+    return { status: 'healthy', details: { adapter: 'memory', entries: this.entries.length } };
   }
 
   child(bindings: Record<string, unknown>): ILogManager {

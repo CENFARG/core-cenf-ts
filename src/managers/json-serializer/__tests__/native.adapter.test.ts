@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NativeJsonSerializer } from '../adapters/native.adapter.js';
-import {
-  JsonSerializationError,
-  JsonDeserializationError,
-} from '../../../shared/errors.js';
-import type { CustomSerializer } from '../types.js';
 
 describe('NativeJsonSerializer', () => {
   let adapter: NativeJsonSerializer;

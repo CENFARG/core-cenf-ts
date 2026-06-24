@@ -290,3 +290,79 @@ export {
 export {
   MemoryCircuitBreakerAdapter,
 } from './managers/circuit-breaker/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// EventBusManager
+// ---------------------------------------------------------------------------
+export type { EventBusManager } from './managers/event-bus/ports.js';
+export { EVENT_BUS_PORT_VERSION } from './managers/event-bus/ports.js';
+export type {
+  EventEnvelope,
+  EventHandler,
+  Subscription,
+} from './managers/event-bus/types.js';
+export { EVENT_BUS_TYPES_VERSION } from './managers/event-bus/types.js';
+export {
+  MemoryEventBusAdapter,
+} from './managers/event-bus/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// I18nManager
+// ---------------------------------------------------------------------------
+export type { I18nManager } from './managers/i18n/ports.js';
+export { I18N_PORT_VERSION } from './managers/i18n/ports.js';
+export type {
+  TranslationParams,
+  I18nOptions,
+} from './managers/i18n/types.js';
+export { I18N_TYPES_VERSION } from './managers/i18n/types.js';
+export {
+  MemoryI18nAdapter,
+} from './managers/i18n/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// JsonSerializer
+// ---------------------------------------------------------------------------
+export type { JsonSerializer } from './managers/json-serializer/ports.js';
+export {
+  JSON_SERIALIZER_PORT_VERSION,
+} from './managers/json-serializer/ports.js';
+export type {
+  CustomSerializer,
+  SerializerConfig,
+} from './managers/json-serializer/types.js';
+export {
+  JSON_SERIALIZER_TYPES_VERSION,
+} from './managers/json-serializer/types.js';
+export {
+  NativeJsonSerializer,
+} from './managers/json-serializer/adapters/native.adapter.js';
+
+// ---------------------------------------------------------------------------
+// HealthManager
+// ---------------------------------------------------------------------------
+export type { HealthManager } from './managers/health/ports.js';
+export { HEALTH_PORT_VERSION } from './managers/health/ports.js';
+export type {
+  HealthReport,
+  ComponentHealth,
+} from './managers/health/types.js';
+export { HEALTH_TYPES_VERSION } from './managers/health/types.js';
+export {
+  AggregatedHealthCheckAdapter,
+} from './managers/health/adapters/aggregated.adapter.js';
+
+// ---------------------------------------------------------------------------
+// BootstrapOrchestrator
+// ---------------------------------------------------------------------------
+export type { BootstrapOrchestrator } from './managers/bootstrap/ports.js';
+export {
+  BOOTSTRAP_PORT_VERSION,
+} from './managers/bootstrap/ports.js';
+export type {
+  BootstrapOptions,
+} from './managers/bootstrap/types.js';
+export { BOOTSTRAP_TYPES_VERSION } from './managers/bootstrap/types.js';
+export {
+  StandardBootstrapAdapter,
+} from './managers/bootstrap/adapters/standard.adapter.js';
