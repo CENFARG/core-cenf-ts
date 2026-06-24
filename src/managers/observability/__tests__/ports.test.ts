@@ -40,7 +40,7 @@ class TestObservabilityManager implements ObservabilityManager {
     return { status: 'healthy', details: {} };
   }
 
-  createSpan(name: string, options?: SpanOptions): Span {
+  createSpan(_name: string, _options?: SpanOptions): Span {
     const span = new NoopSpan();
     this.spans.push(span);
     this.activeSpan = span;

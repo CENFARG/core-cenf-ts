@@ -120,7 +120,7 @@ describe('NoopObservabilityAdapter', () => {
     it('returns most recent span after multiple createSpan calls', () => {
       const adapter = new NoopObservabilityAdapter();
       adapter.createSpan('first');
-      const second = adapter.createSpan('second');
+      adapter.createSpan('second');
       const third = adapter.createSpan('third');
       expect(adapter.getActiveSpan()).toBe(third);
     });
