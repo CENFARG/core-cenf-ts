@@ -7,7 +7,6 @@
  * @module managers/error-handling/adapters/standard.adapter
  */
 
-import { CenfError } from '../../../shared/errors.js';
 import { isCenfError } from '../../../shared/utils.js';
 import type {
   ErrorCategory,
@@ -156,6 +155,7 @@ export class StandardErrorHandlingAdapter
   }
 
   wrap<T extends (...args: unknown[]) => unknown>(fn: T): T {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     const wrapped = function (
@@ -173,10 +173,10 @@ export class StandardErrorHandlingAdapter
               operation: 'wrap',
             });
             throw err;
-          }) as ReturnType<T>;
+          }) as unknown as ReturnType<T>;
         }
 
-        return result;
+        return result as ReturnType<T>;
       } catch (err) {
         self.handle(err, {
           source: fn.name || 'anonymous',

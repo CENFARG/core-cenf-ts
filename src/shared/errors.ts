@@ -54,7 +54,7 @@ export class ValidationError extends CenfError {
 
 /** Secret retrieval, storage, or rotation failure. */
 export class SecretError extends CenfError {
-  readonly code = 'ERR_SECRET';
+  readonly code: string = 'ERR_SECRET';
 }
 
 /** Authentication failure (general). */

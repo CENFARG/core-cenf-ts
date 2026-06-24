@@ -111,3 +111,42 @@ export { PinoLogAdapter } from './managers/logging/adapters/pino.adapter.js';
 export {
   MemoryLogAdapter,
 } from './managers/logging/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// SecretManager
+// ---------------------------------------------------------------------------
+export type { ISecretManager } from './managers/secret/ports.js';
+export { SECRET_PORT_VERSION } from './managers/secret/ports.js';
+export { SecretNotFoundError } from './managers/secret/errors.js';
+export { EnvSecretAdapter } from './managers/secret/adapters/env.adapter.js';
+export {
+  MemorySecretAdapter,
+} from './managers/secret/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// ErrorHandlingManager
+// ---------------------------------------------------------------------------
+export type { IErrorHandlingManager } from './managers/error-handling/ports.js';
+export {
+  ERROR_HANDLING_PORT_VERSION,
+} from './managers/error-handling/ports.js';
+export type {
+  ErrorCategory,
+  ErrorClassification,
+  ErrorContext,
+  ErrorReport,
+} from './managers/error-handling/types.js';
+export { ERROR_HANDLING_TYPES_VERSION } from './managers/error-handling/types.js';
+export {
+  StandardErrorHandlingAdapter,
+} from './managers/error-handling/adapters/standard.adapter.js';
+
+// ---------------------------------------------------------------------------
+// ValidationManager
+// ---------------------------------------------------------------------------
+export type { IValidationManager } from './managers/validation/ports.js';
+export type { ValidationError as ValidationFailure } from './managers/validation/ports.js';
+export { VALIDATION_PORT_VERSION } from './managers/validation/ports.js';
+export {
+  ZodValidationAdapter,
+} from './managers/validation/adapters/zod.adapter.js';

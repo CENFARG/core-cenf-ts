@@ -15,7 +15,7 @@ import { SecretError } from '../../shared/errors.js';
  * that is not present in the secret store.
  */
 export class SecretNotFoundError extends SecretError {
-  readonly code = 'ERR_SECRET_NOT_FOUND';
+  override readonly code = 'ERR_SECRET_NOT_FOUND';
 
   constructor(
     message: string,

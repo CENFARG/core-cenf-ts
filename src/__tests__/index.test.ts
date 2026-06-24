@@ -59,9 +59,32 @@ import {
   CONFIG_TYPES_VERSION,
   LOG_TYPES_VERSION,
 } from '../index.js';
+import {
+  SECRET_PORT_VERSION,
+  SecretNotFoundError,
+  EnvSecretAdapter,
+  MemorySecretAdapter,
+} from '../index.js';
+import {
+  ERROR_HANDLING_PORT_VERSION,
+  ERROR_HANDLING_TYPES_VERSION,
+  StandardErrorHandlingAdapter,
+} from '../index.js';
+import {
+  VALIDATION_PORT_VERSION,
+  ZodValidationAdapter,
+} from '../index.js';
 
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
+import type { ISecretManager } from '../index.js';
+import type { IErrorHandlingManager } from '../index.js';
+import type { IValidationManager } from '../index.js';
+
+// Type-level verification — these are never used at runtime
+void ({} as ISecretManager);
+void ({} as IErrorHandlingManager);
+void ({} as IValidationManager);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -142,5 +165,23 @@ describe('Barrel exports (index.ts)', () => {
     // The test body exists to satisfy vitest; the real check is at compile time.
     const dummy: HealthStatus = { status: 'healthy', details: {} };
     expect(dummy.status).toBe('healthy');
+  });
+
+  it('exports SecretManager port (version proxy) and adapters', () => {
+    expect(SECRET_PORT_VERSION).toBe('0.1.0');
+    expect(SecretNotFoundError).toBeDefined();
+    expect(EnvSecretAdapter).toBeDefined();
+    expect(MemorySecretAdapter).toBeDefined();
+  });
+
+  it('exports ErrorHandlingManager port and adapter', () => {
+    expect(ERROR_HANDLING_PORT_VERSION).toBe('0.1.0');
+    expect(ERROR_HANDLING_TYPES_VERSION).toBe('0.1.0');
+    expect(StandardErrorHandlingAdapter).toBeDefined();
+  });
+
+  it('exports ValidationManager port and adapter', () => {
+    expect(VALIDATION_PORT_VERSION).toBe('0.1.0');
+    expect(ZodValidationAdapter).toBeDefined();
   });
 });
