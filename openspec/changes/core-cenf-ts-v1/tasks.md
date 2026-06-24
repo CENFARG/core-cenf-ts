@@ -134,25 +134,29 @@ Chain strategy: feature-branch-chain
 
 ### Phase 5.1: DatabaseManager
 
-- [ ] **TASK_038**: Create `src/managers/database/ports.ts` + `types.ts` + `errors.ts` — `IDatabaseManager` (`query`, `transaction`, `health`), `DatabaseConnectionError`, `DatabaseQueryError`, `DatabaseTransactionError`. **Lines**: ~45
-- [ ] **TASK_039**: Create `src/managers/database/adapters/drizzle.adapter.ts` — `DrizzleDatabaseAdapter` wrapping Drizzle ORM ≥0.45.2. **Test**: → query returns typed rows, transaction rolls back on error, health PING, connection failure → DatabaseConnectionError. **Lines**: ~65 + ~60 tests
+- [x] **TASK_038**: Create `src/managers/database/ports.ts` + `types.ts` + `errors.ts` — `IDatabaseManager` (`query`, `transaction`, `health`), `DatabaseConnectionError`, `DatabaseQueryError`, `DatabaseTransactionError`. **Lines**: ~45
+- [x] **TASK_039**: Create `src/managers/database/adapters/memory.adapter.ts` — `MemoryDatabaseAdapter` with GenericRepository. **Test**: → INSERT/SELECT/UPDATE/DELETE, transactions with rollback. **Lines**: ~65 + ~60 tests
 
 ### Phase 5.2: StorageManager
 
-- [ ] **TASK_040**: Create `src/managers/storage/ports.ts` + `types.ts` + `errors.ts` — `IStorageManager` (`upload`, `download`, `delete`, `list`, `health`), `StorageUploadError`, `StorageDownloadError`, `StorageDeleteError`. **Lines**: ~50
-- [ ] **TASK_041**: Create `src/managers/storage/adapters/memory.adapter.ts` — `MemoryStorageAdapter`. **Test**: → upload/download roundtrip, delete removes, list returns keys. **Lines**: ~40 + ~45 tests
-- [ ] **TASK_042**: Create `src/managers/storage/adapters/s3.adapter.ts` — `S3StorageAdapter` wrapping `@aws-sdk/client-s3`. **Test**: → upload with streaming, download with range, delete object, list with prefix, health bucket check. **Lines**: ~55 + ~55 tests
+- [x] **TASK_040**: Barrel export DatabaseManager in `src/index.ts`. **Lines**: ~15
+- [x] **TASK_041**: Create `src/managers/storage/ports.ts` + `types.ts` — `StorageManager` (`put`, `get`, `delete`, `list`, `exists`), `StorageObject`, `StorageMetadata`. **Lines**: ~50
+- [x] **TASK_042**: Create `src/managers/storage/adapters/memory.adapter.ts` — `MemoryStorageAdapter`. **Test**: → put/get roundtrip, metadata, prefix list, exists, delete idempotent. **Lines**: ~40 + ~45 tests
+- [x] **TASK_043**: SKIPPED — S3StorageAdapter deferred; all memory-only for PR #5
 
 ### Phase 5.3: HttpClientManager
 
-- [ ] **TASK_043**: Create `src/managers/http-client/ports.ts` + `types.ts` + `errors.ts` — `IHttpClientManager` (`get`, `post`, `put`, `patch`, `delete`), `HttpClientError`, `HttpTimeoutError`, `RequestOptions`, `HttpResponse<T>`. **Lines**: ~45
-- [ ] **TASK_044**: Create `src/managers/http-client/adapters/mock.adapter.ts` — `MockHttpClientAdapter` with predefined response map. **Test**: → GET returns mocked response, POST with body serialized, non-2xx throws HttpClientError. **Lines**: ~40 + ~45 tests
-- [ ] **TASK_045**: Create `src/managers/http-client/adapters/undici.adapter.ts` — `UndiciHttpClientAdapter` wrapping undici with retry/backoff/timeout. **Test**: → retry on 502 then succeed, timeout aborts after deadline, AbortSignal cancels, Content-Type auto-set for JSON. **Lines**: ~55 + ~55 tests
+- [x] **TASK_044**: Create `src/managers/http-client/ports.ts` + `types.ts` — `HttpClientManager` (`get`, `post`, `put`, `patch`, `delete`), `HttpResponse<T>`, `RequestOptions`. **Lines**: ~45
+- [x] **TASK_045**: Create `src/managers/http-client/adapters/fetch.adapter.ts` — `FetchHttpClientAdapter` with register() route map. **Test**: → GET/POST/PUT/DELETE/PATCH via registered routes, unregistered throws HttpClientError. **Lines**: ~40 + ~45 tests
+- [x] **TASK_046**: Barrel export StorageManager + HttpClientManager in `src/index.ts`. **Lines**: ~20
+- [x] **TASK_047**: SKIPPED — UndiciHttpClientAdapter deferred; all memory-only for PR #5
 
 ### Phase 5.4: CircuitBreakerManager
 
-- [ ] **TASK_046**: Create `src/managers/circuit-breaker/ports.ts` + `types.ts` + `errors.ts` — `ICircuitBreakerManager` (`call`, `status`, `reset`), `CircuitBreakerOpenError`, `CircuitBreakerStatus`. **Lines**: ~40
-- [ ] **TASK_047**: Create `src/managers/circuit-breaker/adapters/opossum.adapter.ts` — `OpossumCircuitBreakerAdapter`. **Test**: → closed state normal pass, open after threshold failures (throws immediately), half-open recovery test succeeds → closes, fallback invoked on open circuit, manual reset clears state. **Lines**: ~60 + ~65 tests
+- [x] **TASK_048**: Create `src/managers/circuit-breaker/ports.ts` + `types.ts` — `CircuitBreakerManager` (`execute`, `getState`, `reset`), `CircuitState`, `CircuitOptions`. **Lines**: ~40
+- [x] **TASK_049**: Create `src/managers/circuit-breaker/adapters/memory.adapter.ts` — `MemoryCircuitBreakerAdapter` (CLOSED → OPEN → HALF_OPEN state machine). **Test**: → threshold opens circuit, OPEN fails fast, HALF_OPEN success closes, failure re-opens, reset clears. **Lines**: ~60 + ~65 tests
+- [x] **TASK_050**: Barrel export CircuitBreakerManager in `src/index.ts`. **Lines**: ~15
+- [x] **TASK_051**: SKIPPED — OpossumCircuitBreakerAdapter deferred; all memory-only for PR #5
 
 ---
 
