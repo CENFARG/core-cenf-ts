@@ -186,3 +186,50 @@ export {
 export {
   JoseJwtAdapter,
 } from './managers/auth/adapters/jose.adapter.js';
+
+// ---------------------------------------------------------------------------
+// CacheManager
+// ---------------------------------------------------------------------------
+export type { CacheManager } from './managers/cache/ports.js';
+export { CACHE_PORT_VERSION } from './managers/cache/ports.js';
+export type { CacheEntry, CacheOptions } from './managers/cache/types.js';
+export { CACHE_TYPES_VERSION } from './managers/cache/types.js';
+export {
+  MemoryCacheAdapter,
+} from './managers/cache/adapters/memory.adapter.js';
+export type { MemoryCacheOptions } from './managers/cache/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// FeatureFlagManager
+// ---------------------------------------------------------------------------
+export type { FeatureFlagManager } from './managers/feature-flag/ports.js';
+export { FEATURE_FLAG_PORT_VERSION } from './managers/feature-flag/ports.js';
+export type { FeatureFlag, FlagConfig } from './managers/feature-flag/types.js';
+export { FEATURE_FLAG_TYPES_VERSION } from './managers/feature-flag/types.js';
+export {
+  MemoryFeatureFlagAdapter,
+} from './managers/feature-flag/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// RateLimiterManager
+// ---------------------------------------------------------------------------
+export type { RateLimiterManager } from './managers/rate-limiter/ports.js';
+export { RATE_LIMITER_PORT_VERSION } from './managers/rate-limiter/ports.js';
+export type {
+  TokenBucket,
+  RateLimitConfig,
+  RateLimitResult,
+} from './managers/rate-limiter/types.js';
+export { RATE_LIMITER_TYPES_VERSION } from './managers/rate-limiter/types.js';
+export {
+  MemoryRateLimiterAdapter,
+} from './managers/rate-limiter/adapters/memory.adapter.js';
+
+// ---------------------------------------------------------------------------
+// New error classes (PR #4)
+// ---------------------------------------------------------------------------
+export {
+  FeatureFlagError,
+  FeatureFlagNotFoundError,
+  RateLimitExceededError,
+} from './shared/errors.js';

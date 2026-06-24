@@ -85,6 +85,26 @@ import {
   MemoryAuthAdapter,
   JoseJwtAdapter,
 } from '../index.js';
+import {
+  CACHE_PORT_VERSION,
+  CACHE_TYPES_VERSION,
+  MemoryCacheAdapter,
+} from '../index.js';
+import {
+  FEATURE_FLAG_PORT_VERSION,
+  FEATURE_FLAG_TYPES_VERSION,
+  MemoryFeatureFlagAdapter,
+} from '../index.js';
+import {
+  RATE_LIMITER_PORT_VERSION,
+  RATE_LIMITER_TYPES_VERSION,
+  MemoryRateLimiterAdapter,
+} from '../index.js';
+import {
+  FeatureFlagError,
+  FeatureFlagNotFoundError,
+  RateLimitExceededError,
+} from '../index.js';
 
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
@@ -93,6 +113,9 @@ import type { IErrorHandlingManager } from '../index.js';
 import type { IValidationManager } from '../index.js';
 import type { ObservabilityManager } from '../index.js';
 import type { AuthManager } from '../index.js';
+import type { CacheManager } from '../index.js';
+import type { FeatureFlagManager } from '../index.js';
+import type { RateLimiterManager } from '../index.js';
 
 // Type-level verification — these are never used at runtime
 void ({} as ISecretManager);
@@ -100,6 +123,9 @@ void ({} as IErrorHandlingManager);
 void ({} as IValidationManager);
 void ({} as ObservabilityManager);
 void ({} as AuthManager);
+void ({} as CacheManager);
+void ({} as FeatureFlagManager);
+void ({} as RateLimiterManager);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -211,5 +237,29 @@ describe('Barrel exports (index.ts)', () => {
     expect(AUTH_TYPES_VERSION).toBe('0.1.0');
     expect(MemoryAuthAdapter).toBeDefined();
     expect(JoseJwtAdapter).toBeDefined();
+  });
+
+  it('exports CacheManager port (version proxy) and adapter', () => {
+    expect(CACHE_PORT_VERSION).toBe('0.1.0');
+    expect(CACHE_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryCacheAdapter).toBeDefined();
+  });
+
+  it('exports FeatureFlagManager port (version proxy) and adapter', () => {
+    expect(FEATURE_FLAG_PORT_VERSION).toBe('0.1.0');
+    expect(FEATURE_FLAG_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryFeatureFlagAdapter).toBeDefined();
+  });
+
+  it('exports RateLimiterManager port (version proxy) and adapter', () => {
+    expect(RATE_LIMITER_PORT_VERSION).toBe('0.1.0');
+    expect(RATE_LIMITER_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryRateLimiterAdapter).toBeDefined();
+  });
+
+  it('exports new PR #4 error classes', () => {
+    expect(FeatureFlagError).toBeDefined();
+    expect(FeatureFlagNotFoundError).toBeDefined();
+    expect(RateLimitExceededError).toBeDefined();
   });
 });
