@@ -150,3 +150,39 @@ export { VALIDATION_PORT_VERSION } from './managers/validation/ports.js';
 export {
   ZodValidationAdapter,
 } from './managers/validation/adapters/zod.adapter.js';
+
+// ---------------------------------------------------------------------------
+// ObservabilityManager
+// ---------------------------------------------------------------------------
+export type { ObservabilityManager } from './managers/observability/ports.js';
+export {
+  OBSERVABILITY_PORT_VERSION,
+} from './managers/observability/ports.js';
+export type {
+  Span,
+  SpanContext,
+  SpanKind,
+  SpanStatus,
+  SpanAttributeValue,
+  SpanOptions,
+} from './managers/observability/types.js';
+export {
+  OBSERVABILITY_TYPES_VERSION,
+} from './managers/observability/types.js';
+export {
+  NoopObservabilityAdapter,
+} from './managers/observability/adapters/noop.adapter.js';
+
+// ---------------------------------------------------------------------------
+// AuthManager
+// ---------------------------------------------------------------------------
+export type { AuthManager } from './managers/auth/ports.js';
+export { AUTH_PORT_VERSION } from './managers/auth/ports.js';
+export type { JwtPayload, TokenConfig } from './managers/auth/types.js';
+export { AUTH_TYPES_VERSION } from './managers/auth/types.js';
+export {
+  MemoryAuthAdapter,
+} from './managers/auth/adapters/memory.adapter.js';
+export {
+  JoseJwtAdapter,
+} from './managers/auth/adapters/jose.adapter.js';

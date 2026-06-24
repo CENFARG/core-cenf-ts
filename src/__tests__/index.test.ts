@@ -74,17 +74,32 @@ import {
   VALIDATION_PORT_VERSION,
   ZodValidationAdapter,
 } from '../index.js';
+import {
+  OBSERVABILITY_PORT_VERSION,
+  OBSERVABILITY_TYPES_VERSION,
+  NoopObservabilityAdapter,
+} from '../index.js';
+import {
+  AUTH_PORT_VERSION,
+  AUTH_TYPES_VERSION,
+  MemoryAuthAdapter,
+  JoseJwtAdapter,
+} from '../index.js';
 
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
 import type { ISecretManager } from '../index.js';
 import type { IErrorHandlingManager } from '../index.js';
 import type { IValidationManager } from '../index.js';
+import type { ObservabilityManager } from '../index.js';
+import type { AuthManager } from '../index.js';
 
 // Type-level verification — these are never used at runtime
 void ({} as ISecretManager);
 void ({} as IErrorHandlingManager);
 void ({} as IValidationManager);
+void ({} as ObservabilityManager);
+void ({} as AuthManager);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -183,5 +198,18 @@ describe('Barrel exports (index.ts)', () => {
   it('exports ValidationManager port and adapter', () => {
     expect(VALIDATION_PORT_VERSION).toBe('0.1.0');
     expect(ZodValidationAdapter).toBeDefined();
+  });
+
+  it('exports ObservabilityManager port (version proxy) and adapter', () => {
+    expect(OBSERVABILITY_PORT_VERSION).toBe('0.1.0');
+    expect(OBSERVABILITY_TYPES_VERSION).toBe('0.1.0');
+    expect(NoopObservabilityAdapter).toBeDefined();
+  });
+
+  it('exports AuthManager port (version proxy) and adapters', () => {
+    expect(AUTH_PORT_VERSION).toBe('0.1.0');
+    expect(AUTH_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryAuthAdapter).toBeDefined();
+    expect(JoseJwtAdapter).toBeDefined();
   });
 });
