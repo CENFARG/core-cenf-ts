@@ -233,3 +233,14 @@ export {
   FeatureFlagNotFoundError,
   RateLimitExceededError,
 } from './shared/errors.js';
+
+// ---------------------------------------------------------------------------
+// DatabaseManager
+// ---------------------------------------------------------------------------
+export type { DatabaseManager, GenericRepository } from './managers/database/ports.js';
+export { DATABASE_PORT_VERSION } from './managers/database/ports.js';
+export type { QueryResult, FieldInfo, DbConfig } from './managers/database/types.js';
+export { DATABASE_TYPES_VERSION } from './managers/database/types.js';
+export {
+  MemoryDatabaseAdapter,
+} from './managers/database/adapters/memory.adapter.js';
