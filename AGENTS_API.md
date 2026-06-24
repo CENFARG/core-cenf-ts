@@ -42,7 +42,55 @@
 
 ---
 
-## 3. ValidationManager
+## 3. SecretManager
+
+### Port: `ISecretManager`
+- `getSecret(name: string): Promise<string>` — Retrieve a secret by name
+- `setSecret(name: string, value: string): Promise<void>` — Store a secret
+- `rotateSecret(name: string, newValue: string): Promise<void>` — Rotate a secret
+- `health(): Promise<SecretHealth>`
+
+### Adapters
+- `EnvSecretAdapter` — Reads from `process.env` (dev only)
+- `MemorySecretAdapter` — In-memory for testing
+- `VaultSecretAdapter` — HashiCorp Vault stub (v0.2.0)
+
+### Errors
+- `SecretNotFoundError`
+- `SecretAccessError`
+
+---
+
+## 4. ErrorHandlingManager
+
+### Port: `IErrorHandlingManager`
+- `handle<T>(fn: () => Promise<T>, options?: HandleOptions): Promise<T>` — Wrapped execution with retry/fallback
+- `classify(error: unknown): ErrorClassification` — Categorize error for routing
+- `toResponse(error: unknown): ErrorResponse` — Convert to API-safe response
+
+### Error Taxonomy
+```
+CenfError (abstract)
+├── ConfigError
+├── ValidationError
+├── SecretError
+├── AuthError (TokenExpiredError, TokenInvalidError, TokenVerificationError)
+├── CacheError (CacheConnectionError, CacheOperationError)
+├── DatabaseError (DatabaseConnectionError, DatabaseQueryError, DatabaseTransactionError)
+├── StorageError (StorageUploadError, StorageDownloadError, StorageDeleteError)
+├── HttpClientError (HttpTimeoutError)
+├── CircuitBreakerOpenError
+├── EventBusError (EventBusConnectionError, EventBusPublishError, EventBusSubscriptionError)
+├── ObservabilityError
+├── I18nError
+├── BootstrapError
+├── ShutdownError
+└── JsonError (JsonSerializationError, JsonDeserializationError)
+```
+
+---
+
+## 5. ValidationManager
 
 ### Port: `IValidationManager`
 - `validate<T>(schema: ZodSchema<T>, data: unknown): T` — Sync validation
@@ -58,7 +106,7 @@
 
 ---
 
-## 4. CacheManager
+## 6. CacheManager
 
 ### Port: `ICacheManager`
 - `get<T>(key: string): Promise<T | undefined>`
@@ -78,7 +126,41 @@
 
 ---
 
-## 5. DatabaseManager
+## 7. FeatureFlagManager
+
+### Port: `IFeatureFlagManager`
+- `isEnabled(flag: string, context?: FlagContext): Promise<boolean>` — Check if feature is enabled
+- `getVariant(flag: string, context?: FlagContext): Promise<string>` — Get variant for A/B testing
+- `getAll(context?: FlagContext): Promise<Record<string, boolean>>` — Bulk check
+- `refresh(): Promise<void>` — Reload from source
+
+### Adapters
+- `YamlFeatureFlagAdapter` — Reads from YAML config file
+- `MemoryFeatureFlagAdapter` — In-memory for testing
+
+### Errors
+- `FeatureFlagNotFoundError`
+- `FeatureFlagParseError`
+
+---
+
+## 8. RateLimiterManager
+
+### Port: `IRateLimiterManager`
+- `consume(key: string, tokens?: number): Promise<RateLimitResult>` — Consume tokens
+- `status(key: string): Promise<RateLimitStatus>` — Current rate limit state
+- `reset(key: string): Promise<void>` — Reset counter for a key
+
+### Algorithm
+- Token bucket: fixed capacity, refill rate per second
+- Zero external dependencies — pure TypeScript implementation
+
+### Errors
+- `RateLimitExceededError`
+
+---
+
+## 9. DatabaseManager
 
 ### Port: `IDatabaseManager`
 - `connect(): Promise<void>`
@@ -98,7 +180,7 @@
 
 ---
 
-## 6. AuthManager
+## 10. AuthManager
 
 ### Port: `IAuthManager`
 - `generateToken(payload: TokenPayload, options?: TokenOptions): Promise<string>`
@@ -116,7 +198,7 @@
 
 ---
 
-## 7. ObservabilityManager
+## 11. ObservabilityManager
 
 ### Port: `IObservabilityManager`
 - `createSpan(name: string, context?: SpanContext): Span`
@@ -132,7 +214,7 @@
 
 ---
 
-## 8. StorageManager
+## 12. StorageManager
 
 ### Port: `IStorageManager`
 - `upload(key: string, data: Buffer | Readable, options?: UploadOptions): Promise<string>`
@@ -152,7 +234,7 @@
 
 ---
 
-## 9. CircuitBreakerManager
+## 13. CircuitBreakerManager
 
 ### Port: `ICircuitBreakerManager`
 - `call<T>(name: string, fn: () => Promise<T>, fallback?: () => Promise<T>): Promise<T>`
@@ -167,7 +249,7 @@
 
 ---
 
-## 10. I18nManager
+## 14. I18nManager
 
 ### Port: `II18nManager`
 - `t(key: string, options?: TranslateOptions): string`
@@ -183,7 +265,7 @@
 
 ---
 
-## 11. EventBusManager
+## 15. EventBusManager
 
 ### Port: `IEventBusManager`
 - `publish<T>(subject: string, data: T): Promise<void>`
@@ -192,7 +274,7 @@
 - `health(): Promise<EventBusHealth>`
 
 ### Adapters
-- `NatsEventBusAdapter` — Wraps nats
+- `NatsEventBusAdapter` — Wraps @nats-io/nats-core v3
 
 ### Errors
 - `EventBusConnectionError`
@@ -201,7 +283,7 @@
 
 ---
 
-## 12. HttpClientManager
+## 16. HttpClientManager
 
 ### Port: `IHttpClientManager`
 - `get<T>(url: string, options?: RequestOptions): Promise<HttpResponse<T>>`
@@ -211,7 +293,7 @@
 - `delete<T>(url: string, options?: RequestOptions): Promise<HttpResponse<T>>`
 
 ### Adapters
-- `NativeHttpClientAdapter` — Native fetch with retry
+- `UndiciHttpClientAdapter` — Wraps undici with retry logic
 
 ### Errors
 - `HttpClientError` — Non-2xx response
@@ -219,7 +301,7 @@
 
 ---
 
-## 13. BootstrapOrchestrator
+## 17. BootstrapOrchestrator
 
 ### Port: `IBootstrapOrchestrator`
 - `register(priority: number, fn: () => Promise<void>): void`
@@ -232,7 +314,7 @@
 
 ---
 
-## 14. HealthManager
+## 18. HealthManager
 
 ### Port: `IHealthManager`
 - `register(name: string, check: () => Promise<HealthStatus>): void`
@@ -244,7 +326,7 @@
 
 ---
 
-## 15. JsonSerializer
+## 19. JsonSerializer
 
 ### Port: `IJsonSerializer`
 - `serialize<T>(data: T, options?: SerializeOptions): string`
@@ -290,6 +372,48 @@ interface DatabaseHealth {
 interface EventBusHealth {
   connected: boolean;
   subscriptions: number;
+}
+
+interface SecretHealth {
+  source: 'env' | 'vault' | 'memory';
+  available: boolean;
+}
+
+interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  retryAfterMs?: number;
+}
+
+interface RateLimitStatus {
+  key: string;
+  tokensRemaining: number;
+  capacity: number;
+  refillRate: number;
+}
+
+interface FlagContext {
+  userId?: string;
+  groupId?: string;
+  [key: string]: unknown;
+}
+
+interface ErrorClassification {
+  category: 'client' | 'server' | 'network' | 'timeout';
+  retryable: boolean;
+  userMessage?: string;
+}
+
+interface ErrorResponse {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+interface HandleOptions {
+  retries?: number;
+  fallback?: () => Promise<unknown>;
+  timeoutMs?: number;
 }
 
 // Auth

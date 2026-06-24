@@ -6,7 +6,7 @@
 ## Overview
 
 core-cenf-ts is a TypeScript port of [core-cenf-py](https://github.com/CENFARG/core-cenf-py) (v0.1.0),
-providing 15 transversal infrastructure managers following **Clean Architecture / Hexagonal (Ports & Adapters)**.
+providing 17 transversal infrastructure managers following **Clean Architecture / Hexagonal (Ports & Adapters)**.
 
 ## Architecture Principle
 
@@ -20,25 +20,29 @@ import type { CacheManager } from './ports/cache-manager.port.js';
 import { RedisCacheAdapter } from '../infrastructure/cache/redis-cache.adapter.js';
 ```
 
-## 15 Managers
+## 17 Managers
 
 | # | Manager       | Port                               | Adapter Ecosystem          | Python Sibling |
 |---|---------------|------------------------------------|----------------------------|----------------|
 | 1 | Config        | `ConfigManager`                    | Typed env/Zod schema       | ConfigManager  |
 | 2 | Logging       | `LogManager`                       | pino                       | LogManager     |
-| 3 | Validation    | `ValidationManager`                | Zod                        | ValidationMgr  |
-| 4 | Cache         | `CacheManager`                     | ioredis                    | CacheManager   |
-| 5 | Database      | `DatabaseManager`                  | Drizzle or Prisma          | DatabaseMgr    |
-| 6 | Auth          | `AuthManager`                      | jose (JWT)                 | AuthManager    |
-| 7 | Observability | `ObservabilityManager`             | @opentelemetry/api         | Observability  |
-| 8 | Storage       | `StorageManager`                   | @aws-sdk/client-s3         | StorageManager |
-| 9 | CircuitBreaker| `CircuitBreakerManager`            | opossum                    | CircuitBreaker |
-| 10| I18n          | `I18nManager`                      | i18next                    | I18nManager    |
-| 11| EventBus      | `EventBusManager`                  | nats                       | EventBus       |
-| 12| HttpClient    | `HttpClientManager`                | Native fetch + retry       | HttpClient     |
-| 13| Bootstrap     | `BootstrapOrchestrator`            | Lifecycle wiring           | BootstrapOrch  |
-| 14| Health        | `HealthManager`                    | Aggregated health checks   | HealthManager  |
-| 15| JsonSerializer| `JsonSerializer`                   | Native BigInt-safe JSON    | JsonSerializer |
+| 3 | Secret        | `SecretManager`                    | env/vault/memory           | *(new)*        |
+| 4 | ErrorHandling | `ErrorHandlingManager`             | @handle_errors decorator   | *(new)*        |
+| 5 | Validation    | `ValidationManager`                | Zod                        | ValidationMgr  |
+| 6 | Observability | `ObservabilityManager`             | @opentelemetry/api         | Observability  |
+| 7 | Auth          | `AuthManager`                      | jose (JWT)                 | AuthManager    |
+| 8 | Cache         | `CacheManager`                     | ioredis                    | CacheManager   |
+| 9 | FeatureFlag   | `FeatureFlagManager`               | YAML/memory                | *(new)*        |
+| 10| RateLimiter   | `RateLimiterManager`               | Token bucket (zero deps)   | *(new)*        |
+| 11| Database      | `DatabaseManager`                  | Drizzle or Prisma          | DatabaseMgr    |
+| 12| Storage       | `StorageManager`                   | @aws-sdk/client-s3         | StorageManager |
+| 13| HttpClient    | `HttpClientManager`                | undici + retry             | HttpClient     |
+| 14| CircuitBreaker| `CircuitBreakerManager`            | opossum                    | CircuitBreaker |
+| 15| EventBus      | `EventBusManager`                  | @nats-io/nats-core v3      | EventBus       |
+| 16| I18n          | `I18nManager`                      | i18next                    | I18nManager    |
+| 17| JsonSerializer| `JsonSerializer`                   | Native BigInt-safe JSON    | JsonSerializer |
+| 18| Health        | `HealthManager`                    | Aggregated health checks   | HealthManager  |
+| 19| Bootstrap     | `BootstrapOrchestrator`            | Lifecycle wiring           | BootstrapOrch  |
 
 ## File Structure (planned)
 
@@ -47,31 +51,29 @@ src/
 ├── index.ts                           # Public API exports
 ├── managers/
 │   ├── config/
-│   │   ├── ports.ts                   # IConfigManager interface
-│   │   ├── adapters/                  # Implementations
-│   │   │   ├── env-config.adapter.ts
-│   │   │   └── zod-config.adapter.ts
-│   │   ├── errors.ts
-│   │   └── types.ts
 │   ├── logging/
-│   ├── cache/
-│   ├── database/
-│   ├── auth/
+│   ├── secret/
+│   ├── error-handling/
+│   ├── validation/
 │   ├── observability/
+│   ├── auth/
+│   ├── cache/
+│   ├── feature-flag/
+│   ├── rate-limiter/
+│   ├── database/
 │   ├── storage/
-│   ├── circuit-breaker/
-│   ├── i18n/
-│   ├── event-bus/
 │   ├── http-client/
-│   ├── bootstrap/
+│   ├── circuit-breaker/
+│   ├── event-bus/
+│   ├── i18n/
+│   ├── json-serializer/
 │   ├── health/
-│   └── json-serializer/
+│   └── bootstrap/
 ├── shared/
-│   ├── errors.ts                      # Base error classes
+│   ├── errors.ts                      # CenfError hierarchy
 │   ├── types.ts                       # Shared types
-│   └── utils.ts                       # Shared utilities
-└── infrastructure/                    # Cross-cutting adapters
-    └── ...
+│   ├── context.ts                     # AsyncLocalStorage wrapper
+│   └── lifecycle.ts                   # AsyncLifecycle interface
 ```
 
 ## @ai-directive (agent instructions)

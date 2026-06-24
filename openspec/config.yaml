@@ -4,17 +4,20 @@ schema: spec-driven
 context: |
   Tech stack: TypeScript 5.x + Node.js 20+, npm
   Architecture: Clean Architecture / Hexagonal (Ports & Adapters)
-    — 15 transversal managers ported from Python sibling (core-cenf-py v0.1.0)
+    — 19 transversal managers ported from Python sibling (core-cenf-py v0.1.0)
     - Zod (validation), ioredis (cache), Drizzle/Prisma (DB), pino (logging)
     - jose (JWT), @opentelemetry/api (observability), @aws-sdk/client-s3 (storage)
     - opossum (circuit breaker), i18next (i18n), vitest (testing)
-    - tsup (building), nats (event bus)
+    - tsup (building), @nats-io/nats-core v3 (event bus), undici (http client)
+    - dotenv (config env loading), token bucket (rate limiter, zero deps)
   Testing: vitest + @vitest/coverage-v8
   Style: ESLint flat config + Prettier
+  DI: Manual constructor injection (NO tsyringe/awilix)
+  Context: AsyncLocalStorage<ContextStore> (replaces Python contextvars)
 
 strict_tdd: true
 
-# Managers NOT ported from Python version:
+# Managers NOT ported in v0.1.0 (deferred to v0.2.0+):
 # TaskQueue (BullMQ is different), DynamicPrompting (LLM-specific),
 # Alert (native SDKs), Licence (shared REST service),
 # Update (Electron autoUpdater), Permission (casbin different in Node)
