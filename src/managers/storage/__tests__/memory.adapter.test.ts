@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MemoryStorageAdapter } from '../adapters/memory.adapter.js';
-import type { StorageManager } from '../ports.js';
-import type { StorageObject, StorageMetadata } from '../types.js';
+import type { StorageMetadata } from '../types.js';
 
 describe('MemoryStorageAdapter', () => {
   let storage: MemoryStorageAdapter;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MemoryDatabaseAdapter } from '../adapters/memory.adapter.js';
-import type { DatabaseManager, GenericRepository } from '../ports.js';
+import type { GenericRepository } from '../ports.js';
 
 interface TestUser {
   id: number;

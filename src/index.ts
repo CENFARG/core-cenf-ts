@@ -272,3 +272,21 @@ export { HTTP_CLIENT_TYPES_VERSION } from './managers/http-client/types.js';
 export {
   FetchHttpClientAdapter,
 } from './managers/http-client/adapters/fetch.adapter.js';
+
+// ---------------------------------------------------------------------------
+// CircuitBreakerManager
+// ---------------------------------------------------------------------------
+export type { CircuitBreakerManager } from './managers/circuit-breaker/ports.js';
+export {
+  CIRCUIT_BREAKER_PORT_VERSION,
+} from './managers/circuit-breaker/ports.js';
+export type {
+  CircuitState,
+  CircuitOptions,
+} from './managers/circuit-breaker/types.js';
+export {
+  CIRCUIT_BREAKER_TYPES_VERSION,
+} from './managers/circuit-breaker/types.js';
+export {
+  MemoryCircuitBreakerAdapter,
+} from './managers/circuit-breaker/adapters/memory.adapter.js';

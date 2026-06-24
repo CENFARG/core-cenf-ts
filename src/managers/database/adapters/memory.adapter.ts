@@ -87,9 +87,9 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
 
     const fields: FieldInfo[] =
       filtered.length > 0
-        ? Object.keys(filtered[0]).map((name) => ({
+        ? Object.keys(filtered[0]!).map((name) => ({
             name,
-            dataType: typeof filtered[0][name] === 'number' ? 'INTEGER' : 'TEXT',
+            dataType: typeof filtered[0]![name] === 'number' ? 'INTEGER' : 'TEXT',
           }))
         : this.inferFields(table);
 
@@ -167,6 +167,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
   getRepository<T extends { id?: number }>(
     tableName: string,
   ): GenericRepository<T> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const db = this;
 
     return {
@@ -175,7 +176,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
           `SELECT * FROM ${tableName} WHERE id = $1`,
           [String(id)],
         );
-        return result.rows.length > 0 ? result.rows[0] : null;
+        return result.rows.length > 0 ? (result.rows[0] as T) : null;
       },
 
       async findAll(): Promise<T[]> {
@@ -209,7 +210,6 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
           );
         }
 
-        const updated = { ...existing, ...entity };
         const setClauses = Object.keys(entity as Record<string, unknown>)
           .map((col, i) => `${col} = $${i + 1}`)
           .join(', ');
@@ -228,7 +228,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
           `SELECT * FROM ${tableName} WHERE id = $1`,
           [String(id)],
         );
-        return result.rows[0];
+        return result.rows[0]!;
       },
 
       async delete(id: string | number): Promise<void> {
@@ -247,15 +247,15 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
     );
     if (!match) return 0;
 
-    const table = match[1];
-    const cols = match[2].split(',').map((c) => c.trim());
-    const vals = match[3].split(',').map((v) => v.trim());
+    const table = match[1]!;
+    const cols = match[2]!.split(',').map((c) => c.trim());
+    const vals = match[3]!.split(',').map((v) => v.trim());
 
     // Resolve values: parameters ($1, $2, ...) or literal strings
     const resolved = vals.map((v) => {
       const paramMatch = v.match(/^\$(\d+)$/);
       if (paramMatch && params) {
-        const idx = parseInt(paramMatch[1], 10) - 1;
+        const idx = parseInt(paramMatch[1]!, 10) - 1;
         return params[idx];
       }
       // Strip surrounding quotes
@@ -264,7 +264,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
 
     const row: Row = {};
     for (let i = 0; i < cols.length; i++) {
-      row[cols[i]] = resolved[i];
+      row[cols[i]!] = resolved[i];
     }
 
     this.getTable(table).push(row);
@@ -296,24 +296,29 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
   // -----------------------------------------------------------------------
 
   private handleUpdate(sql: string, params?: unknown[]): number {
-    const match = sql.match(
-      /UPDATE\s+(\w+)\s+SET\s+(.+?)(?:\s+WHERE\s+(.+))?/i,
+    // Try with WHERE clause first (non-greedy .+? stops at required WHERE)
+    let match = sql.match(
+      /UPDATE\s+(\w+)\s+SET\s+(.+?)\s+WHERE\s+(.+)/i,
     );
+    if (!match) {
+      // No WHERE clause — greedy .+ consumes the rest
+      match = sql.match(/UPDATE\s+(\w+)\s+SET\s+(.+)/i);
+    }
     if (!match) return 0;
 
-    const table = match[1];
-    const setClause = match[2];
+    const table = match[1]!;
+    const setClause = match[2]!;
     const whereClause = match[3] ?? null;
 
     // Parse SET clause: "col1 = $1, col2 = $2"
     const setPairs = setClause.split(',').map((p) => {
       const [col, val] = p.split('=').map((s) => s.trim());
-      const paramMatch = val.match(/^\$(\d+)$/);
+      const paramMatch = val!.match(/^\$(\d+)$/);
       if (paramMatch && params) {
-        const idx = parseInt(paramMatch[1], 10) - 1;
-        return { col, value: params[idx] };
+        const idx = parseInt(paramMatch[1]!, 10) - 1;
+        return { col: col!, value: params[idx] };
       }
-      return { col, value: val.replace(/^'/, '').replace(/'$/, '') };
+      return { col: col!, value: val!.replace(/^'/, '').replace(/'$/, '') };
     });
 
     let count = 0;
@@ -351,12 +356,12 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
     let where: { column: string; value: unknown } | null = null;
 
     if (whereMatch) {
-      const col = whereMatch[1];
-      let val: unknown = whereMatch[2].trim();
+      const col = whereMatch[1]!;
+      let val: unknown = whereMatch[2]!.trim();
 
       const paramMatch = (val as string).match(/^\$(\d+)$/);
       if (paramMatch && params) {
-        const idx = parseInt(paramMatch[1], 10) - 1;
+        const idx = parseInt(paramMatch[1]!, 10) - 1;
         val = params[idx];
       } else {
         val = (val as string).replace(/^'/, '').replace(/'$/, '');
@@ -366,7 +371,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
     }
 
     return {
-      table: fromMatch ? fromMatch[1] : 'unknown',
+      table: fromMatch ? fromMatch[1]! : 'unknown',
       where,
     };
   }
@@ -382,12 +387,12 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
     const match = whereClause.match(/(\w+)\s*=\s*(.+?)(?:\s|$)/i);
     if (!match) return false;
 
-    const col = match[1];
-    let val: unknown = match[2].trim();
+    const col = match[1]!;
+    let val: unknown = match[2]!.trim();
 
     const paramMatch = (val as string).match(/^\$(\d+)$/);
     if (paramMatch && params) {
-      const idx = parseInt(paramMatch[1], 10) - 1;
+      const idx = parseInt(paramMatch[1]!, 10) - 1;
       val = params[idx];
     } else {
       val = (val as string).replace(/^'/, '').replace(/'$/, '');
@@ -402,9 +407,9 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
   private inferFields(table: string): FieldInfo[] {
     const rows = this.tables.get(table);
     if (!rows || rows.length === 0) return [];
-    return Object.keys(rows[0]).map((name) => ({
+    return Object.keys(rows[0]!).map((name) => ({
       name,
-      dataType: typeof rows[0][name] === 'number' ? 'INTEGER' : 'TEXT',
+      dataType: typeof rows[0]![name] === 'number' ? 'INTEGER' : 'TEXT',
     }));
   }
 

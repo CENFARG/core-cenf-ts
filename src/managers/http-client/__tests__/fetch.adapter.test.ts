@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { FetchHttpClientAdapter } from '../adapters/fetch.adapter.js';
-import type { HttpClientManager } from '../ports.js';
-import type { HttpResponse } from '../types.js';
 
 interface TestUser {
   id: number;

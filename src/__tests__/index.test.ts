@@ -121,6 +121,12 @@ import {
   HTTP_CLIENT_TYPES_VERSION,
   FetchHttpClientAdapter,
 } from '../index.js';
+import {
+  CIRCUIT_BREAKER_PORT_VERSION,
+  CIRCUIT_BREAKER_TYPES_VERSION,
+  MemoryCircuitBreakerAdapter,
+} from '../index.js';
+import type { CircuitBreakerManager } from '../index.js';
 
 // Type-only (compile-time verification — confirmed by `npm run typecheck`)
 import type { HealthStatus } from '../index.js';
@@ -148,6 +154,7 @@ void ({} as RateLimiterManager);
 void ({} as DatabaseManager);
 void ({} as StorageManager);
 void ({} as HttpClientManager);
+void ({} as CircuitBreakerManager);
 
 describe('Barrel exports (index.ts)', () => {
   it('exports VERSION', () => {
@@ -301,5 +308,11 @@ describe('Barrel exports (index.ts)', () => {
     expect(HTTP_CLIENT_PORT_VERSION).toBe('0.1.0');
     expect(HTTP_CLIENT_TYPES_VERSION).toBe('0.1.0');
     expect(FetchHttpClientAdapter).toBeDefined();
+  });
+
+  it('exports CircuitBreakerManager port (version proxy) and adapter', () => {
+    expect(CIRCUIT_BREAKER_PORT_VERSION).toBe('0.1.0');
+    expect(CIRCUIT_BREAKER_TYPES_VERSION).toBe('0.1.0');
+    expect(MemoryCircuitBreakerAdapter).toBeDefined();
   });
 });
