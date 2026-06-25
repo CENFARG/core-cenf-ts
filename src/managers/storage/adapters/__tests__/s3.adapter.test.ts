@@ -5,6 +5,7 @@ import {
   StorageUploadError,
   StorageDownloadError,
   StorageDeleteError,
+  StoragePresignError,
 } from '../../../../shared/errors.js';
 
 // ---------------------------------------------------------------------------
@@ -324,5 +325,59 @@ describe('S3StorageAdapter — presigned URLs', () => {
     mockGetSignedUrl.mockResolvedValueOnce('https://test-bucket.s3.us-east-1.amazonaws.com/path/to/object.txt?X-Amz-Expires=3600&...');
     const url = await adapter.getPresignedUrl(TEST_KEY);
     expect(url).toContain('X-Amz-Expires=3600');
+  });
+
+  it('getPresignedUrl wraps errors as StoragePresignError (F5 audit fix)', async () => {
+    mockGetSignedUrl.mockRejectedValueOnce(new Error('InvalidCredentials'));
+    await expect(
+      adapter.getPresignedUrl(TEST_KEY),
+    ).rejects.toThrow(StoragePresignError);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// S3StorageAdapter — list error wrapping (F5b audit fix)
+// ---------------------------------------------------------------------------
+
+describe('S3StorageAdapter — list error wrapping', () => {
+  let adapter: S3StorageAdapter;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    adapter = new S3StorageAdapter(VALID_OPTIONS);
+  });
+
+  it('list() wraps AWS errors as StorageDownloadError (F5b audit fix)', async () => {
+    mockSend.mockRejectedValueOnce(new Error('AccessDenied'));
+    await expect(adapter.list('prefix/')).rejects.toThrow(
+      StorageDownloadError,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// S3StorageAdapter — health check (audit fix: distinguish NotFound)
+// ---------------------------------------------------------------------------
+
+describe('S3StorageAdapter — health check audit fix', () => {
+  let adapter: S3StorageAdapter;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    adapter = new S3StorageAdapter(VALID_OPTIONS);
+  });
+
+  it('health() returns degraded for non-NotFound errors (auth/network)', async () => {
+    mockSend.mockRejectedValueOnce(new Error('AccessDenied'));
+    const health = await adapter.health();
+    expect(health.status).toBe('degraded');
+    expect(health.details.error).toBeDefined();
+  });
+
+  it('health() returns healthy for NotFound errors (bucket reachable)', async () => {
+    const err = Object.assign(new Error('NoSuchKey'), { name: 'NoSuchKey' });
+    mockSend.mockRejectedValueOnce(err);
+    const health = await adapter.health();
+    expect(health.status).toBe('healthy');
   });
 });

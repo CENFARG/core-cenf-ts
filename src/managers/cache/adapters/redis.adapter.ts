@@ -10,6 +10,10 @@
 import Redis from 'ioredis';
 import type { CacheManager } from '../ports.js';
 import type { HealthStatus } from '../../../shared/types.js';
+import {
+  CacheOperationError,
+  CacheConnectionError,
+} from '../../../shared/errors.js';
 
 // ---------------------------------------------------------------------------
 // RedisCacheOptions
@@ -60,6 +64,9 @@ export class RedisCacheAdapter implements CacheManager {
   /** Single-flight pending getOrSet operations to prevent thundering herd. */
   private pendingGets = new Map<string, Promise<unknown>>();
 
+  /** Stored error handler reference for cleanup in stop(). */
+  private errorHandler: ((...args: unknown[]) => void) | null = null;
+
   constructor(options: RedisCacheOptions = {}) {
     this.url = options.url ?? 'redis://localhost:6379';
     this.keyPrefix = options.keyPrefix ?? 'core-cenf:cache:';
@@ -76,9 +83,11 @@ export class RedisCacheAdapter implements CacheManager {
       const raw = await this.redis.get(this.pk(key));
       if (raw === null) return null;
       return JSON.parse(raw) as T;
-    } catch {
-      console.warn('[redis-cache] get failed', key);
-      return null;
+    } catch (error) {
+      throw new CacheOperationError(
+        `Redis GET failed for key '${key}'`,
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
@@ -94,8 +103,11 @@ export class RedisCacheAdapter implements CacheManager {
       } else {
         await this.redis.set(prefixedKey, serialized);
       }
-    } catch {
-      console.warn('[redis-cache] set failed', key);
+    } catch (error) {
+      throw new CacheOperationError(
+        `Redis SET failed for key '${key}'`,
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
@@ -123,8 +135,11 @@ export class RedisCacheAdapter implements CacheManager {
     if (!this.redis) return;
     try {
       await this.redis.del(this.pk(key));
-    } catch {
-      console.warn('[redis-cache] del failed', key);
+    } catch (error) {
+      throw new CacheOperationError(
+        `Redis DEL failed for key '${key}'`,
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
@@ -133,9 +148,11 @@ export class RedisCacheAdapter implements CacheManager {
     try {
       const result = await this.redis.exists(this.pk(key));
       return result === 1;
-    } catch {
-      console.warn('[redis-cache] has failed', key);
-      return false;
+    } catch (error) {
+      throw new CacheOperationError(
+        `Redis EXISTS failed for key '${key}'`,
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
@@ -146,8 +163,11 @@ export class RedisCacheAdapter implements CacheManager {
       if (keys.length > 0) {
         await this.redis.del(...keys);
       }
-    } catch {
-      console.warn('[redis-cache] clear failed');
+    } catch (error) {
+      throw new CacheOperationError(
+        'Redis CLEAR failed',
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
@@ -158,18 +178,30 @@ export class RedisCacheAdapter implements CacheManager {
   async start(): Promise<void> {
     try {
       this.redis = new Redis(this.url);
-      this.redis.on('error', () => {
+      this.errorHandler = () => {
         this.connected = false;
+      };
+      this.redis.on('error', this.errorHandler);
+      this.redis.on('ready', () => {
+        this.connected = true;
       });
       await this.redis.ping();
       this.connected = true;
-    } catch {
+    } catch (error) {
       this.connected = false;
+      throw new CacheConnectionError(
+        `Failed to connect to Redis at '${this.url}'`,
+        error instanceof Error ? error : undefined,
+      );
     }
   }
 
   async stop(): Promise<void> {
     if (this.redis) {
+      if (this.errorHandler) {
+        this.redis.off('error', this.errorHandler);
+        this.errorHandler = null;
+      }
       try {
         await this.redis.quit();
       } catch {

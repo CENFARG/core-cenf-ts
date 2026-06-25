@@ -11,6 +11,7 @@
 import type { HttpClientManager } from '../ports.js';
 import type { RequestOptions, HttpResponse } from '../types.js';
 import type { HealthStatus } from '../../../shared/types.js';
+import { HttpClientError } from '../../../shared/errors.js';
 
 /** HTTP method union for route registration. */
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -136,19 +137,5 @@ export class FetchHttpClientAdapter implements HttpClientManager {
       );
     }
     return response as HttpResponse<T>;
-  }
-}
-
-/**
- * HTTP client error — thrown for unregistered routes in memory adapter.
- *
- * Mirror of the shared/errors.ts HttpClientError for adapter-local use.
- */
-class HttpClientError extends Error {
-  readonly code = 'ERR_HTTP_CLIENT';
-
-  constructor(message: string) {
-    super(message);
-    this.name = 'HttpClientError';
   }
 }

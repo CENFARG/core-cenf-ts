@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RedisCacheAdapter } from '../redis.adapter.js';
+import { CacheConnectionError } from '../../../../shared/errors.js';
 import type { CacheManager } from '../../ports.js';
 
 // ---------------------------------------------------------------------------
@@ -10,6 +11,7 @@ const {
   mockPing,
   mockQuit,
   mockOn,
+  mockOff,
   mockGet,
   mockSet,
   mockDel,
@@ -23,6 +25,7 @@ const {
   const quitFn = vi.fn().mockResolvedValue('OK');
   const disconnect = vi.fn();
   const on = vi.fn();
+  const off = vi.fn();
   const get = vi.fn().mockResolvedValue(null);
   const set = vi.fn().mockResolvedValue('OK');
   const del = vi.fn().mockResolvedValue(1);
@@ -34,6 +37,7 @@ const {
     quit: quitFn,
     disconnect,
     on,
+    off,
     get,
     set,
     del,
@@ -48,6 +52,7 @@ const {
     mockQuit: quitFn,
     mockDisconnect: disconnect,
     mockOn: on,
+    mockOff: off,
     mockGet: get,
     mockSet: set,
     mockDel: del,
@@ -144,6 +149,14 @@ describe('RedisCacheAdapter', () => {
     expect(healthResult.details.connected).toBe(false);
   });
 
+  it('stop() removes error listener via off() (F2 audit fix)', async () => {
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+    await adapter.stop();
+
+    expect(mockOff).toHaveBeenCalledWith('error', expect.any(Function));
+  });
+
   it('stop() disconnects from Redis', async () => {
     adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
     await adapter.start();
@@ -152,20 +165,13 @@ describe('RedisCacheAdapter', () => {
     expect(mockQuit).toHaveBeenCalled();
   });
 
-  it('connection failure sets up memory fallback', async () => {
+  it('connection failure throws CacheConnectionError (F3 audit fix)', async () => {
     mockPing.mockRejectedValue(new Error('Connection refused'));
 
     adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
 
-    // start() should NOT throw — it falls back gracefully
-    await expect(adapter.start()).resolves.toBeUndefined();
-
-    const healthResult = (await adapter.health()) as {
-      status: string;
-      details: Record<string, unknown>;
-    };
-
-    expect(healthResult.details.connected).toBe(false);
+    // start() now throws CacheConnectionError — no silent degradation
+    await expect(adapter.start()).rejects.toThrow(CacheConnectionError);
   });
 
   it('start() registers error listener on Redis connection', async () => {

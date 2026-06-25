@@ -224,7 +224,7 @@ export class DrizzleDatabaseAdapter implements DatabaseManager {
           [id],
         );
         if (result.rows.length === 0) {
-          throw new Error(
+          throw new DatabaseQueryError(
             `Entity not found in table '${tableName}' with id '${id}'`,
           );
         }

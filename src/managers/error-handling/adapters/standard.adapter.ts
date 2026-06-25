@@ -78,6 +78,23 @@ const CLASSIFICATION_MAP: Record<string, ClassificationRule> = {
   ERR_HEALTH_CHECK_TIMEOUT: { category: 'server', retryable: false },
   ERR_JSON_SERIALIZATION: { category: 'server', retryable: false },
   ERR_JSON_DESERIALIZATION: { category: 'server', retryable: false },
+
+  // Feature flag errors — client/config category
+  ERR_FEATURE_FLAG: { category: 'client', retryable: false },
+  ERR_FEATURE_FLAG_NOT_FOUND: { category: 'client', retryable: false },
+
+  // Rate limiter — client category (caller should back off)
+  ERR_RATE_LIMIT_EXCEEDED: {
+    category: 'client',
+    retryable: false,
+    userMessage: 'Rate limit exceeded. Retry after the indicated window.',
+  },
+
+  // Storage presign — server category
+  ERR_STORAGE_PRESIGN: { category: 'server', retryable: false },
+
+  // Logging configuration — server category
+  ERR_LOG_CONFIGURATION: { category: 'server', retryable: false },
 };
 
 const DEFAULT_CLASSIFICATION: ClassificationRule = {

@@ -12,6 +12,7 @@
 import type { DatabaseManager, GenericRepository } from '../ports.js';
 import type { QueryResult, FieldInfo } from '../types.js';
 import type { HealthStatus } from '../../../shared/types.js';
+import { DatabaseQueryError } from '../../../shared/errors.js';
 
 /** A table row stored in memory. */
 type Row = Record<string, unknown>;
@@ -205,7 +206,7 @@ export class MemoryDatabaseAdapter implements DatabaseManager {
       ): Promise<T> {
         const existing = await this.findById(id);
         if (!existing) {
-          throw new Error(
+          throw new DatabaseQueryError(
             `Entity not found in table '${tableName}' with id '${id}'`,
           );
         }

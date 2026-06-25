@@ -19,7 +19,7 @@ describe('Incremental orch-b test', () => {
     bootstrap.register(eventBus, { priority: 15, name: 'eventBus' });
     bootstrap.register(jsonSerializer, { priority: 17, name: 'jsonSerializer' });
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
+    // NOTE: Self-registration removed — F7 audit fix prevents infinite recursion
 
     health.register(eventBus, 'eventBus');
     health.register(jsonSerializer, 'jsonSerializer');

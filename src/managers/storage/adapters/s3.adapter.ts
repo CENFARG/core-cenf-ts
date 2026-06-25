@@ -23,6 +23,7 @@ import {
   StorageUploadError,
   StorageDownloadError,
   StorageDeleteError,
+  StoragePresignError,
 } from '../../../shared/errors.js';
 
 // ---------------------------------------------------------------------------
@@ -115,10 +116,20 @@ export class S3StorageAdapter implements StorageManager {
         }),
       );
       return { status: 'healthy', details: { adapter: 's3', bucket: this.bucket } };
-    } catch {
-      // HeadObject may fail if the key doesn't exist — still healthy
-      // if we can reach the bucket at all.
-      return { status: 'healthy', details: { adapter: 's3', bucket: this.bucket } };
+    } catch (error) {
+      // NoSuchKey/NotFound = bucket reachable, key missing → still healthy
+      if (isNotFoundError(error)) {
+        return { status: 'healthy', details: { adapter: 's3', bucket: this.bucket } };
+      }
+      // Other errors (auth, network, permissions) → degraded
+      return {
+        status: 'degraded',
+        details: {
+          adapter: 's3',
+          bucket: this.bucket,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      };
     }
   }
 
@@ -214,27 +225,35 @@ export class S3StorageAdapter implements StorageManager {
   // -----------------------------------------------------------------------
 
   async list(prefix?: string): Promise<StorageObject[]> {
-    const response = await this.client.send(
-      new ListObjectsV2Command({
-        Bucket: this.bucket,
-        Prefix: prefix,
-      }),
-    );
+    try {
+      const response = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+        }),
+      );
 
-    if (!response.Contents || response.Contents.length === 0) {
-      return [];
+      if (!response.Contents || response.Contents.length === 0) {
+        return [];
+      }
+
+      return response.Contents.filter(
+        (obj): obj is typeof obj & { Key: string } =>
+          obj.Key !== undefined,
+      ).map((obj) => ({
+        key: obj.Key!,
+        data: Buffer.alloc(0), // list() returns metadata only — no data
+        metadata: {
+          size: obj.Size,
+          lastModified: obj.LastModified,
+        },
+      }));
+    } catch (error) {
+      throw new StorageDownloadError(
+        `Failed to list objects in bucket '${this.bucket}' with prefix '${prefix ?? ''}'.`,
+        error instanceof Error ? error : undefined,
+      );
     }
-
-    return response.Contents.filter((obj): obj is typeof obj & { Key: string } =>
-      obj.Key !== undefined,
-    ).map((obj) => ({
-      key: obj.Key!,
-      data: Buffer.alloc(0), // list() returns metadata only — no data
-      metadata: {
-        size: obj.Size,
-        lastModified: obj.LastModified,
-      },
-    }));
   }
 
   // -----------------------------------------------------------------------
@@ -274,10 +293,17 @@ export class S3StorageAdapter implements StorageManager {
    * @returns A presigned URL string.
    */
   async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
-    return getSignedUrl(this.client, command, { expiresIn });
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+      return await getSignedUrl(this.client, command, { expiresIn });
+    } catch (error) {
+      throw new StoragePresignError(
+        `Failed to generate presigned URL for '${key}' in bucket '${this.bucket}'.`,
+        error instanceof Error ? error : undefined,
+      );
+    }
   }
 }

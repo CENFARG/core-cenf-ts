@@ -60,6 +60,8 @@ export class StandardBootstrapAdapter implements BootstrapOrchestrator {
   // -----------------------------------------------------------------------
 
   async start(): Promise<void> {
+    if (this.isStarted) return; // Idempotent — already started
+
     this.started = [];
 
     // Sort by priority (ascending: lower number = earlier start)
@@ -82,6 +84,7 @@ export class StandardBootstrapAdapter implements BootstrapOrchestrator {
         this.started = [];
         throw new BootstrapError(
           `Failed to start manager '${entry.name}': ${error instanceof Error ? error.message : String(error)}`,
+          error,
         );
       }
     }
@@ -127,6 +130,13 @@ export class StandardBootstrapAdapter implements BootstrapOrchestrator {
   // -----------------------------------------------------------------------
 
   register(manager: AsyncLifecycle, options?: BootstrapOptions): void {
+    // Guard: prevent self-registration (would cause infinite recursion)
+    if (manager === this) {
+      throw new BootstrapError(
+        'The bootstrap orchestrator cannot register itself.',
+      );
+    }
+
     const name = options?.name ?? manager.constructor.name;
     const priority = options?.priority ?? DEFAULT_PRIORITY;
 

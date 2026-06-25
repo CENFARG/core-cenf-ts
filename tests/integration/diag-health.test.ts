@@ -11,7 +11,7 @@ describe('Health adapter + bootstrap test', () => {
     health = new AggregatedHealthCheckAdapter();
 
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
+    // NOTE: Self-registration removed — F7 audit fix prevents infinite recursion
 
     await bootstrap.start();
   });

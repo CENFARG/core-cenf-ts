@@ -104,7 +104,7 @@ describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => 
     bootstrap.register(i18n, { priority: 16, name: 'i18n' });
     bootstrap.register(jsonSerializer, { priority: 17, name: 'jsonSerializer' });
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
+    // NOTE: Self-registration removed — F7 audit fix prevents infinite recursion
 
     // If we got here without throws, registration succeeded
     expect(true).toBe(true);
@@ -129,7 +129,6 @@ describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => 
     bootstrap.register(i18n, { priority: 16, name: 'i18n' });
     bootstrap.register(jsonSerializer, { priority: 17, name: 'jsonSerializer' });
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
 
     await expect(bootstrap.start()).resolves.toBeUndefined();
 
@@ -156,7 +155,7 @@ describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => 
     bootstrap.register(i18n, { priority: 16, name: 'i18n' });
     bootstrap.register(jsonSerializer, { priority: 17, name: 'jsonSerializer' });
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
+    // Self-registration removed — F7 audit fix
 
     // Register managers with health adapter for aggregation
     health.register(config, 'config');
@@ -203,7 +202,7 @@ describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => 
     bootstrap.register(i18n, { priority: 16, name: 'i18n' });
     bootstrap.register(jsonSerializer, { priority: 17, name: 'jsonSerializer' });
     bootstrap.register(health, { priority: 18, name: 'health' });
-    bootstrap.register(bootstrap, { priority: 19, name: 'bootstrap' });
+    // Self-registration removed — F7 audit fix
 
     await bootstrap.start();
     await bootstrap.stop();
@@ -232,7 +231,7 @@ describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => 
       { mgr: i18n, priority: 16, name: 'i18n' },
       { mgr: jsonSerializer, priority: 17, name: 'jsonSerializer' },
       { mgr: health, priority: 18, name: 'health' },
-      { mgr: bootstrap, priority: 19, name: 'bootstrap' },
+      // Self-registration removed — F7 audit fix
     ];
 
     for (const m of managers) {
