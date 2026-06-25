@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { EnvConfigAdapter } from '../adapters/env.adapter.js';
 import { ConfigValidationError } from '../errors.js';
@@ -134,5 +134,55 @@ describe('EnvConfigAdapter', () => {
     const options: EnvConfigOptions = { dotenvPath: '/custom/.env' };
     const adapter = new EnvConfigAdapter(options);
     expect(adapter).toBeDefined();
+  });
+
+  // -----------------------------------------------------------------------
+  // TASK_001 RED: process.loadEnvFile() replaces dotenv
+  // -----------------------------------------------------------------------
+
+  it('start() calls process.loadEnvFile() instead of dotenv', async () => {
+    const spy = vi.spyOn(process, 'loadEnvFile');
+    const options: EnvConfigOptions = { dotenvPath: '/test/.env' };
+    const adapter = new EnvConfigAdapter(options);
+
+    await adapter.start();
+
+    expect(spy).toHaveBeenCalledWith('/test/.env');
+    spy.mockRestore();
+  });
+
+  it('reload() calls process.loadEnvFile()', async () => {
+    const spy = vi.spyOn(process, 'loadEnvFile');
+    const options: EnvConfigOptions = { dotenvPath: '/test/.env' };
+    const adapter = new EnvConfigAdapter(options);
+
+    await adapter.reload();
+
+    expect(spy).toHaveBeenCalledWith('/test/.env');
+    spy.mockRestore();
+  });
+
+  it('start() without dotenvPath uses default .env', async () => {
+    const spy = vi.spyOn(process, 'loadEnvFile');
+    const adapter = new EnvConfigAdapter();
+
+    await adapter.start();
+
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it('start() handles missing file gracefully', async () => {
+    const spy = vi
+      .spyOn(process, 'loadEnvFile')
+      .mockImplementation(() => {
+        throw new Error('ENOENT');
+      });
+    const adapter = new EnvConfigAdapter({ dotenvPath: '/nonexistent/.env' });
+
+    // Should not throw — continues with existing process.env
+    await expect(adapter.start()).resolves.toBeUndefined();
+
+    spy.mockRestore();
   });
 });

@@ -89,6 +89,7 @@ import {
   CACHE_PORT_VERSION,
   CACHE_TYPES_VERSION,
   MemoryCacheAdapter,
+  RedisCacheAdapter,
 } from '../index.js';
 import {
   FEATURE_FLAG_PORT_VERSION,
@@ -313,6 +314,7 @@ describe('Barrel exports (index.ts)', () => {
     expect(CACHE_PORT_VERSION).toBe('0.1.0');
     expect(CACHE_TYPES_VERSION).toBe('0.1.0');
     expect(MemoryCacheAdapter).toBeDefined();
+    expect(RedisCacheAdapter).toBeDefined();
   });
 
   it('exports FeatureFlagManager port (version proxy) and adapter', () => {
