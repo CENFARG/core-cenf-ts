@@ -249,6 +249,9 @@ export { DATABASE_TYPES_VERSION } from './managers/database/types.js';
 export {
   MemoryDatabaseAdapter,
 } from './managers/database/adapters/memory.adapter.js';
+export {
+  DrizzleDatabaseAdapter,
+} from './managers/database/adapters/drizzle.adapter.js';
 
 // ---------------------------------------------------------------------------
 // StorageManager
@@ -258,11 +261,15 @@ export { STORAGE_PORT_VERSION } from './managers/storage/ports.js';
 export type {
   StorageObject,
   StorageMetadata,
+  S3StorageOptions,
 } from './managers/storage/types.js';
 export { STORAGE_TYPES_VERSION } from './managers/storage/types.js';
 export {
   MemoryStorageAdapter,
 } from './managers/storage/adapters/memory.adapter.js';
+export {
+  S3StorageAdapter,
+} from './managers/storage/adapters/s3.adapter.js';
 
 // ---------------------------------------------------------------------------
 // HttpClientManager
