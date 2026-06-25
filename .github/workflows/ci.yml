@@ -33,6 +33,8 @@ jobs:
         run: npm run lint
 
       - name: Test with coverage
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: npm run test:coverage
 
       - name: Security audit (runtime deps only)
