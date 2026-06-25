@@ -35,10 +35,9 @@ jobs:
       - name: Test with coverage
         run: npm run test:coverage
 
-      - name: Security audit
-        # Fails only on CRITICAL vulns. HIGH vulns in transitive dev deps 
-        # (tar, node-gyp via @libsql/client) are known and unfixable.
-        run: npm audit --audit-level=critical
+      - name: Security audit (runtime deps only)
+        # --omit=dev skips build-time transitive vulns (tar, node-gyp)
+        run: npm audit --audit-level=high --omit=dev
 
       - name: Generate SBOM
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
