@@ -32,6 +32,7 @@ export {
   StorageUploadError,
   StorageDownloadError,
   StorageDeleteError,
+  StoragePresignError,
   HttpTimeoutError,
   HttpClientError,
   CircuitBreakerOpenError,

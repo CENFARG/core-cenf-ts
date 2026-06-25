@@ -152,6 +152,11 @@ export class StorageDeleteError extends CenfError {
   readonly code = 'ERR_STORAGE_DELETE';
 }
 
+/** Presigned URL generation failure. */
+export class StoragePresignError extends CenfError {
+  readonly code = 'ERR_STORAGE_PRESIGN';
+}
+
 // ---------------------------------------------------------------------------
 // HTTP / network errors (PR #5)
 // ---------------------------------------------------------------------------
