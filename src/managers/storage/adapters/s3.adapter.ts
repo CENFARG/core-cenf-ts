@@ -15,6 +15,7 @@ import {
   HeadObjectCommand,
   ListObjectsV2Command,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { StorageManager } from '../ports.js';
 import type { StorageObject, StorageMetadata, S3StorageOptions } from '../types.js';
 import type { HealthStatus } from '../../../shared/types.js';
@@ -35,12 +36,6 @@ const NOT_FOUND_ERRORS = new Set([
   'NoSuchBucket',
 ]);
 
-/** S3 error names that indicate access/permission issues. */
-const ACCESS_DENIED_ERRORS = new Set([
-  'AccessDenied',
-  'Forbidden',
-]);
-
 /**
  * Check if an error is an S3 "not found" error (NoSuchKey, NotFound, etc.).
  */
@@ -49,17 +44,6 @@ function isNotFoundError(error: unknown): boolean {
     typeof error === 'object'
     && error !== null
     && NOT_FOUND_ERRORS.has((error as { name?: string }).name ?? '')
-  );
-}
-
-/**
- * Check if an error is an S3 access denied / forbidden error.
- */
-function isAccessDeniedError(error: unknown): boolean {
-  return (
-    typeof error === 'object'
-    && error !== null
-    && ACCESS_DENIED_ERRORS.has((error as { name?: string }).name ?? '')
   );
 }
 
@@ -290,8 +274,6 @@ export class S3StorageAdapter implements StorageManager {
    * @returns A presigned URL string.
    */
   async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-    // Placeholder for TASK_015 — returns a constructed URL string.
-    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,

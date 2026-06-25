@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { S3StorageAdapter } from '../s3.adapter.js';
-import type { StorageManager } from '../../ports.js';
 import type { StorageObject } from '../../types.js';
 import {
   StorageUploadError,

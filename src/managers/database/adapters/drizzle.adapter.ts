@@ -10,7 +10,7 @@
 
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import type { Client } from '@libsql/client';
+import type { Client, InArgs } from '@libsql/client';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import type { DatabaseManager, GenericRepository } from '../ports.js';
 import type { QueryResult, FieldInfo, DbConfig } from '../types.js';
@@ -98,10 +98,7 @@ export class DrizzleDatabaseAdapter implements DatabaseManager {
   ): Promise<QueryResult<T>> {
     this.ensureInitialized();
     try {
-      const result = await this.client.execute({
-        sql: sqlStr,
-        args: (params ?? []) as Record<string, unknown>[] | string[],
-      });
+      const result = await this.client.execute(sqlStr, (params ?? []) as InArgs);
       const rows = result.rows as unknown as T[];
       const fields = inferFieldsFromColumns(result.columns);
       return { rows, rowCount: result.rows.length, fields };
@@ -120,10 +117,7 @@ export class DrizzleDatabaseAdapter implements DatabaseManager {
   async execute(sqlStr: string, params?: unknown[]): Promise<number> {
     this.ensureInitialized();
     try {
-      const result = await this.client.execute({
-        sql: sqlStr,
-        args: (params ?? []) as Record<string, unknown>[] | string[],
-      });
+      const result = await this.client.execute(sqlStr, (params ?? []) as InArgs);
       return result.rowsAffected;
     } catch (error) {
       throw new DatabaseQueryError(
@@ -261,19 +255,14 @@ export class DrizzleDatabaseAdapter implements DatabaseManager {
 // ---------------------------------------------------------------------------
 
 /**
- * Infer field metadata from libsql column definitions.
+ * Infer field metadata from libsql column names.
  */
-interface LibsqlColumn {
-  name: string;
-  type: string;
-}
-
 function inferFieldsFromColumns(
-  columns: LibsqlColumn[] | undefined,
+  columns: string[] | undefined,
 ): FieldInfo[] {
   if (!columns || columns.length === 0) return [];
   return columns.map((col) => ({
-    name: col.name,
-    dataType: col.type ?? 'string',
+    name: col,
+    dataType: 'string',
   }));
 }

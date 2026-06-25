@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import { sql } from 'drizzle-orm';
 import type { Client } from '@libsql/client';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { DrizzleDatabaseAdapter } from '../drizzle.adapter.js';
-import type { DatabaseManager } from '../../ports.js';
 import { DatabaseConnectionError, DatabaseQueryError } from '../../../../shared/errors.js';
 
 // ---------------------------------------------------------------------------
@@ -13,12 +9,10 @@ import { DatabaseConnectionError, DatabaseQueryError } from '../../../../shared/
 // ---------------------------------------------------------------------------
 
 let client: Client;
-let drizzleDb: LibSQLDatabase;
 
 beforeAll(async () => {
   // Create an in-memory SQLite database for testing
   client = createClient({ url: ':memory:' });
-  drizzleDb = drizzle(client);
 });
 
 afterAll(async () => {
@@ -76,8 +70,6 @@ describe('DrizzleDatabaseAdapter — raw query', () => {
   let adapter: DrizzleDatabaseAdapter;
 
   beforeAll(async () => {
-    const freshClient = createClient({ url: ':memory:' });
-    const freshDb = drizzle(freshClient);
     adapter = new DrizzleDatabaseAdapter({ url: ':memory:' });
     await adapter.start();
   });
