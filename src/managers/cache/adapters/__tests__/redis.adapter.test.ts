@@ -9,7 +9,6 @@ import type { CacheManager } from '../../ports.js';
 const {
   mockPing,
   mockQuit,
-  mockDisconnect,
   mockOn,
   mockGet,
   mockSet,
