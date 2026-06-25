@@ -54,6 +54,7 @@
     "eslint": "^9.0.0",
     "prettier": "^3.4.0",
     "supertest": "^7.0.0",
+    "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "tsup": "^8.4.0",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.0.0",
