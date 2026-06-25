@@ -1,53 +1,6 @@
-# ConfigManager Specification
+# Delta for ConfigManager
 
-## Purpose
-
-Provides typed, validated configuration loading from environment variables and file sources. Eliminates `process.env` scattering and ensures all config is schema-validated at startup.
-
-## Port Interface
-
-```typescript
-interface IConfigManager {
-  load<T>(schema: Zod.ZodSchema<T>): Promise<T>;
-  get<T>(key: string): T | undefined;
-  set<T>(key: string, value: T): void;
-  reload(): Promise<void>;
-}
-```
-
-## Adapter Contracts
-
-| Adapter | Purpose |
-|---------|---------|
-| `EnvConfigAdapter` | Reads `process.env`, loads `.env` via native `process.loadEnvFile()`, validates with Zod |
-| `FileConfigAdapter` | Reads YAML/JSON config files, merges with env overrides |
-
-## Error Types
-
-- `ConfigValidationError` — Zod schema validation failed (extends `CenfError`)
-- `ConfigNotFoundError` — Required key missing, no default provided
-
-## Configuration
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `CENF_ENV` | `local\|dev\|staging\|prod` | `local` | Deployment environment |
-| `CENF_CONFIG_PATH` | `string` | `./config` | Config file directory |
-| `CENF_CONFIG_FORMAT` | `env\|yaml\|json` | `env` | Config source format |
-
-## Lifecycle
-
-- `start()`: Loads `.env` via `process.loadEnvFile()`, validates schema, populates internal store
-- `stop()`: No-op (config is read-only after load)
-- `health()`: Returns `{ status: 'healthy', details: { env, keysLoaded } }`
-
-## Testing Strategy
-
-- **Unit**: `EnvConfigAdapter` with mocked `process.env`, verify Zod validation
-- **Integration**: `FileConfigAdapter` with temp YAML files, verify merge order
-- **Edge cases**: Missing required vars, invalid types, dotenv reload races
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Schema-Validated Config Loading
 

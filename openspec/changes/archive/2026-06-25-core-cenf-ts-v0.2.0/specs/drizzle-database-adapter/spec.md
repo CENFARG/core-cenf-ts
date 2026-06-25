@@ -1,8 +1,8 @@
-# DatabaseManager Specification
+# DrizzleDatabaseAdapter Specification
 
 ## Purpose
 
-Provides database connectivity with Drizzle ORM (≥0.45.2), generic repository pattern, and transaction support. Abstracts ORM-specific APIs behind a common interface.
+Production database adapter using drizzle-orm v0.45.2, providing GenericRepository<T> pattern, SQLite backend for zero-Docker testing, and transaction support.
 
 ## Port Interface
 
@@ -22,21 +22,14 @@ interface GenericRepository<T> {
   update(id: string | number, data: Partial<T>): Promise<T>;
   delete(id: string | number): Promise<boolean>;
 }
-
-interface DatabaseHealth {
-  connected: boolean;
-  latencyMs: number;
-  poolStatus?: { active: number; idle: number; waiting: number };
-}
 ```
 
 ## Adapter Contracts
 
 | Adapter | Purpose |
 |---------|---------|
-| `DrizzleDatabaseAdapter` | Wraps Drizzle ORM with PostgreSQL/SQLite drivers, GenericRepository<T> |
+| `DrizzleDatabaseAdapter` | drizzle-orm wrapper with PostgreSQL/SQLite drivers |
 | `MemoryDatabaseAdapter` | In-memory store for unit testing |
-| `PrismaDatabaseAdapter` | Wraps Prisma Client (alternative) |
 
 ## Error Types
 
@@ -54,44 +47,7 @@ interface DatabaseHealth {
 | `CENF_DB_POOL_SIZE` | `number` | `10` | Connection pool size (PostgreSQL only) |
 | `CENF_DB_MIGRATIONS_DIR` | `string` | `./migrations` | Migration files path |
 
-## Lifecycle
-
-- `start()`: Connects to database, runs pending migrations, validates pool
-- `stop()`: Closes all connections, drains pool
-- `health()`: Returns connection status, latency, pool stats
-
-## Testing Strategy
-
-- **Unit**: GenericRepository<T> CRUD operations with memory adapter
-- **Integration**: Drizzle adapter with test PostgreSQL container
-- **Edge cases**: Connection pool exhaustion, transaction rollback, migration failures
-
 ## Requirements
-
-### Requirement: Connection Lifecycle Management
-
-The system MUST manage database connections with connect/disconnect lifecycle. Health checks MUST verify actual connectivity.
-
-#### Scenario: Successful connection
-
-- GIVEN valid `CENF_DB_URL` pointing to a running database
-- WHEN `await db.connect()` is called
-- THEN the connection pool is established
-- AND `await db.health()` returns `{ connected: true, latencyMs: <50 }`
-
-#### Scenario: Connection failure
-
-- GIVEN `CENF_DB_URL` points to an unreachable host
-- WHEN `await db.connect()` is called
-- THEN it throws `DatabaseConnectionError`
-- AND the error includes the connection string (without credentials)
-
-#### Scenario: Graceful disconnect
-
-- GIVEN an active database connection
-- WHEN `await db.disconnect()` is called
-- THEN all connections are closed
-- AND subsequent queries throw `DatabaseConnectionError`
 
 ### Requirement: Database Connection with Driver Selection
 
@@ -100,21 +56,21 @@ The system MUST connect using the configured driver (PostgreSQL or SQLite). SQLi
 #### Scenario: SQLite in-memory connection
 
 - GIVEN `CENF_DB_DRIVER=sqlite` and `CENF_DB_SQLITE_PATH=:memory:`
-- WHEN `await db.connect()` is called
+- WHEN `await adapter.connect()` is called
 - THEN an in-memory SQLite database is created via drizzle-orm
-- AND `await db.health()` returns `{ connected: true, latencyMs: <10 }`
+- AND `await adapter.health()` returns `{ connected: true, latencyMs: <10 }`
 
 #### Scenario: PostgreSQL connection with pool
 
 - GIVEN `CENF_DB_URL=postgres://user:pass@localhost:5432/db` and `CENF_DB_POOL_SIZE=5`
-- WHEN `await db.connect()` is called
+- WHEN `await adapter.connect()` is called
 - THEN a connection pool of 5 is established
-- AND `await db.health()` returns pool status with active/idle counts
+- AND `await adapter.health()` returns pool status with active/idle counts
 
 #### Scenario: Connection failure with invalid URL
 
 - GIVEN `CENF_DB_URL=postgres://invalid:5432/db` pointing to unreachable host
-- WHEN `await db.connect()` is called
+- WHEN `await adapter.connect()` is called
 - THEN it throws `DatabaseConnectionError`
 - AND the error includes the sanitized URL (credentials redacted)
 
@@ -150,28 +106,29 @@ The system MUST provide a `GenericRepository<T>` that supports findById, findAll
 - THEN the row is removed from the database
 - AND subsequent `findById(id)` returns `undefined`
 
-### Requirement: Transaction Support
+### Requirement: Transaction Support with Automatic Rollback
 
-The system MUST support transactions with automatic rollback on error. The transaction function MUST receive a transaction context.
+The system MUST support transactions via drizzle-orm's transaction API. Errors within a transaction MUST trigger automatic rollback. Nested transactions MUST be supported.
 
 #### Scenario: Successful transaction commit
 
-- WHEN `await db.transaction(async (tx) => { await tx.execute("INSERT..."); return "ok"; })` is called
-- THEN the INSERT is committed
-- AND `"ok"` is returned
+- WHEN `await db.transaction(async (tx) => { await tx.insert(users).values(...); return "ok"; })` is called
+- THEN the INSERT is committed to the database
+- AND `"ok"` is returned to the caller
 
 #### Scenario: Transaction rollback on error
 
-- WHEN the transaction function throws an error mid-execution
+- WHEN the transaction function throws after an INSERT but before completion
 - THEN all operations within the transaction are rolled back
-- AND the error is propagated to the caller
+- AND the error propagates to the caller
+- AND no partial data remains in the database
 
-#### Scenario: Raw SQL query execution
+#### Scenario: Transaction isolation
 
-- GIVEN a table `users` exists with columns `id`, `name`
-- WHEN `await db.query<User>("SELECT * FROM users WHERE id = $1", [1])` is called
-- THEN it returns an array of matching rows typed as `User[]`
-- AND SQL injection via params is prevented
+- GIVEN two concurrent transactions modifying the same row
+- WHEN both execute simultaneously
+- THEN one completes and the other waits or fails based on isolation level
+- AND no data corruption occurs
 
 ### Requirement: Raw SQL Query Execution
 

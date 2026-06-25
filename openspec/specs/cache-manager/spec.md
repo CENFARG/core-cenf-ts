@@ -40,6 +40,7 @@ interface CacheHealth {
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `CENF_CACHE_URL` | `string` | `redis://localhost:6379` | Redis connection string |
+| `CENF_CACHE_KEY_PREFIX` | `string` | `core-cenf:cache` | Key prefix for scoping |
 | `CENF_CACHE_DEFAULT_TTL` | `number` | `300` | Default TTL in seconds |
 | `CENF_CACHE_STAMPEDE_WINDOW` | `number` | `10` | XFetch early recompute window (seconds) |
 
@@ -54,6 +55,36 @@ interface CacheHealth {
 - **Unit**: `MemoryCacheAdapter` — TTL expiry, XFetch stampede prevention
 - **Integration**: `RedisCacheAdapter` with testcontainers or mock Redis
 - **Edge cases**: Connection loss recovery, serialization of complex types, large values
+
+### Requirement: Graceful Error Recovery
+
+The system MUST catch Redis errors during any operation and fall back to the in-memory adapter for that operation. The adapter MUST NOT throw on transient Redis failures.
+
+#### Scenario: Redis timeout during get()
+
+- GIVEN Redis is connected but becomes unresponsive
+- WHEN `await cache.get("key")` times out
+- THEN the error is caught
+- AND the memory adapter is consulted as fallback
+- AND no exception propagates to the caller
+
+#### Scenario: Redis reconnection after failure
+
+- GIVEN Redis was unreachable and fallback is active
+- WHEN Redis becomes available again
+- THEN the adapter attempts reconnection on next operation
+- AND switches back to Redis on success
+
+### Requirement: Health Check with Latency
+
+The system MUST report Redis connectivity status, round-trip latency, and key count (when available).
+
+#### Scenario: Health check returns Redis metrics
+
+- GIVEN Redis is connected and healthy
+- WHEN `await cache.health()` is called
+- THEN it returns `{ connected: true, latencyMs: <50, keysCount: N }`
+- AND latency is measured via Redis PING
 
 ## Requirements
 
@@ -82,6 +113,13 @@ The system MUST store and retrieve values with optional TTL. Expired entries MUS
 - THEN it returns `false` (or true, implementation-defined)
 - AND no error is thrown
 
+#### Scenario: Key prefix scoping
+
+- GIVEN adapter is configured with `keyPrefix: "myapp"`
+- WHEN `await cache.set("user:1", { name: "Alice" })` is called
+- THEN the actual Redis key stored is `myapp:user:1`
+- AND `await cache.get("user:1")` retrieves the value
+
 ### Requirement: XFetch Stampede Mitigation
 
 The system MUST implement XFetch probabilistic early recompute to prevent thundering herd when hot keys near expiry.
@@ -107,3 +145,11 @@ The system MUST implement XFetch probabilistic early recompute to prevent thunde
 - THEN the factory is invoked
 - AND the result is stored in cache with TTL=60
 - AND the result is returned to the caller
+
+#### Scenario: Single-flight on concurrent cache miss
+
+- GIVEN key "expensive" is not in cache
+- WHEN 10 concurrent callers invoke `getOrSet("expensive", factory)` simultaneously
+- THEN `factory` is called exactly once
+- AND all 10 callers receive the same result
+- AND the result is stored in cache
