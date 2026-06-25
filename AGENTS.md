@@ -6,7 +6,9 @@
 ## Overview
 
 core-cenf-ts is a TypeScript port of [core-cenf-py](https://github.com/CENFARG/core-cenf-py) (v0.1.0),
-providing 17 transversal infrastructure managers following **Clean Architecture / Hexagonal (Ports & Adapters)**.
+providing **19 transversal infrastructure managers** following **Clean Architecture / Hexagonal (Ports & Adapters)**.
+
+**Latest release**: [v0.2.0](https://github.com/CENFARG/core-cenf-ts/releases/tag/v0.2.0) — Production-ready with 3 real adapters (Redis, S3, Drizzle), dotenv eliminated, blind agent E2E, CI/CD pipeline. 708 tests, all passing.
 
 ## Architecture Principle
 
@@ -20,7 +22,7 @@ import type { CacheManager } from './ports/cache-manager.port.js';
 import { RedisCacheAdapter } from '../infrastructure/cache/redis-cache.adapter.js';
 ```
 
-## 17 Managers
+## 19 Managers
 
 | # | Manager       | Port                               | Adapter Ecosystem          | Python Sibling |
 |---|---------------|------------------------------------|----------------------------|----------------|
@@ -44,7 +46,7 @@ import { RedisCacheAdapter } from '../infrastructure/cache/redis-cache.adapter.j
 | 18| Health        | `HealthManager`                    | Aggregated health checks   | HealthManager  |
 | 19| Bootstrap     | `BootstrapOrchestrator`            | Lifecycle wiring           | BootstrapOrch  |
 
-## File Structure (planned)
+## File Structure
 
 ```
 src/
@@ -90,12 +92,14 @@ src/
 ```bash
 npm install
 npm run build
+npm run typecheck
+npm run lint
 npm test
 ```
 
 ## References
 
-- `AGENTS_API.md` — Structured catalog of all 15 managers
+- `AGENTS_API.md` — Structured catalog of all 19 managers
 - `api-catalog.json` — Machine-parseable API reference
 - `openspec/config.yaml` — SDD project configuration
-- CodeGraph: TODO (build when code exists)
+- CodeGraph: `.codegraph/` — Pre-indexed knowledge graph (auto-synced)
