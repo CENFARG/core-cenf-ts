@@ -329,4 +329,88 @@ describe('RedisCacheAdapter', () => {
 
     await expect(adapter.clear()).resolves.toBeUndefined();
   });
+
+  // -----------------------------------------------------------------------
+  // getOrSet — single-flight stampede protection
+  // -----------------------------------------------------------------------
+
+  it('getOrSet() invokes factory on cache miss and stores result', async () => {
+    mockGet.mockResolvedValue(null); // cache miss
+    const factory = vi.fn().mockResolvedValue('computed');
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const result = await adapter.getOrSet('miss', factory);
+
+    expect(result).toBe('computed');
+    expect(factory).toHaveBeenCalledTimes(1);
+    // Should store the computed value in cache
+    expect(mockSet).toHaveBeenCalledWith(
+      'core-cenf:cache:miss',
+      '"computed"',
+    );
+  });
+
+  it('getOrSet() returns cached value and skips factory on hit', async () => {
+    mockGet.mockResolvedValue('"stored"');
+    const factory = vi.fn().mockResolvedValue('should-not-be-called');
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const result = await adapter.getOrSet('cached', factory);
+
+    expect(result).toBe('stored');
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  it('getOrSet() single-flight: 10 concurrent callers invoke factory exactly once', async () => {
+    let callCount = 0;
+    const factory = vi.fn().mockImplementation(async () => {
+      callCount++;
+      // Small delay to ensure all concurrent callers pile up
+      await new Promise((r) => setTimeout(r, 10));
+      return 'single-flight-result';
+    });
+    // First get returns null (cache miss), triggering factory
+    mockGet.mockResolvedValue(null);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const promises = Array.from({ length: 10 }, () =>
+      adapter.getOrSet('concurrent-key', factory),
+    );
+    const results = await Promise.all(promises);
+
+    expect(results).toHaveLength(10);
+    results.forEach((r) => expect(r).toBe('single-flight-result'));
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect(callCount).toBe(1);
+  });
+
+  it('getOrSet() with TTL stores value with expiration', async () => {
+    mockGet.mockResolvedValue(null);
+    const factory = vi.fn().mockResolvedValue('timed');
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.getOrSet('timed-key', factory, 300_000);
+
+    expect(mockSetex).toHaveBeenCalledWith(
+      'core-cenf:cache:timed-key',
+      300,
+      '"timed"',
+    );
+  });
+
+  it('getOrSet() grace period: factory failure on miss returns error', async () => {
+    mockGet.mockResolvedValue(null);
+    const factory = vi.fn().mockRejectedValue(new Error('Factory failed'));
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await expect(
+      adapter.getOrSet('failing-key', factory),
+    ).rejects.toThrow('Factory failed');
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
 });

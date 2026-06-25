@@ -57,6 +57,9 @@ export class RedisCacheAdapter implements CacheManager {
   protected readonly keyPrefix: string;
   protected readonly defaultTtlMs: number | undefined;
 
+  /** Single-flight pending getOrSet operations to prevent thundering herd. */
+  private pendingGets = new Map<string, Promise<unknown>>();
+
   constructor(options: RedisCacheOptions = {}) {
     this.url = options.url ?? 'redis://localhost:6379';
     this.keyPrefix = options.keyPrefix ?? 'core-cenf:cache:';
@@ -97,11 +100,23 @@ export class RedisCacheAdapter implements CacheManager {
   }
 
   async getOrSet<T>(
-    _key: string,
+    key: string,
     factory: () => Promise<T>,
-    _ttlMs?: number,
+    ttlMs?: number,
   ): Promise<T> {
-    return factory();
+    // Check for an existing pending operation (single-flight)
+    const pending = this.pendingGets.get(key);
+    if (pending !== undefined) {
+      return pending as Promise<T>;
+    }
+
+    const promise = this._getOrSetImpl(key, factory, ttlMs);
+    this.pendingGets.set(key, promise);
+    try {
+      return await promise;
+    } finally {
+      this.pendingGets.delete(key);
+    }
   }
 
   async del(key: string): Promise<void> {
@@ -187,5 +202,26 @@ export class RedisCacheAdapter implements CacheManager {
    */
   private pk(key: string): string {
     return `${this.keyPrefix}${key}`;
+  }
+
+  /**
+   * Core getOrSet implementation — check cache first,
+   * invoke factory on miss, store result.
+   */
+  private async _getOrSetImpl<T>(
+    key: string,
+    factory: () => Promise<T>,
+    ttlMs?: number,
+  ): Promise<T> {
+    // Try cache first
+    const cached = await this.get<T>(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // Cache miss — compute and store
+    const value = await factory();
+    await this.set(key, value, ttlMs);
+    return value;
   }
 }
