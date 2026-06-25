@@ -114,7 +114,7 @@ Chain strategy: feature-branch-chain
 
 ## PR #2 — S3StorageAdapter + DrizzleDatabaseAdapter (~450 lines) ⚠️ EXCEEDS 400
 
-### TASK_011: Promote drizzle-orm to deps + add better-sqlite3 devDeps
+### TASK_011: ✅ Promote drizzle-orm to deps + add @libsql/client devDep
 - **PR**: #2
 - **Files**: `package.json` (modify)
 - **Tests**: `npm run typecheck`
@@ -122,7 +122,7 @@ Chain strategy: feature-branch-chain
 - **Estimated lines**: +3/-1
 - **Acceptance**: `drizzle-orm` in `dependencies`; `better-sqlite3` + `@types/better-sqlite3` in `devDependencies`
 
-### TASK_012: Write S3StorageAdapter test — connection, put, get, delete (RED)
+### TASK_012: ✅ Write S3StorageAdapter test — connection, put, get, delete (RED)
 - **PR**: #2
 - **Files**: `src/managers/storage/adapters/__tests__/s3.adapter.test.ts` (create)
 - **Tests**: Mock @aws-sdk/client-s3: connect, bucket validation, upload Buffer, upload stream, download, download missing → error, delete idempotent, exists
@@ -130,7 +130,7 @@ Chain strategy: feature-branch-chain
 - **Estimated lines**: +100
 - **Acceptance**: 10 tests fail (RED) — adapter doesn't exist yet
 
-### TASK_013: S3StorageAdapter — put/get/delete/list/exists (GREEN)
+### TASK_013: ✅ S3StorageAdapter — put/get/delete/list/exists (GREEN)
 - **PR**: #2
 - **Files**: `src/managers/storage/adapters/s3.adapter.ts` (create)
 - **Tests**: TASK_012 tests pass
@@ -138,7 +138,7 @@ Chain strategy: feature-branch-chain
 - **Estimated lines**: +80
 - **Acceptance**: PutObject/GetObject/DeleteObject/ListObjectsV2/HeadObject work; delete idempotent; MinIO endpoint with `forcePathStyle: true`
 
-### TASK_014: Write S3StorageAdapter test — presigned URLs + error mapping (RED)
+### TASK_014: ? Write S3StorageAdapter test — presigned URLs + error mapping (RED)
 - **PR**: #2
 - **Files**: `src/managers/storage/adapters/__tests__/s3.adapter.test.ts` (modify)
 - **Tests**: presignUrl default expiry (3600s), custom expiry, NoSuchKey → StorageDownloadError, AccessDenied → StorageUploadError, network error → StorageDownloadError
@@ -154,7 +154,7 @@ Chain strategy: feature-branch-chain
 - **Estimated lines**: +40
 - **Acceptance**: Presigned GET URLs generated with correct expiry; S3 errors mapped to CenfError subtypes with key name in message
 
-### TASK_016: Write DrizzleDatabaseAdapter test — connection, query, health (RED)
+### TASK_016: ? Write DrizzleDatabaseAdapter test — connection, query, health (RED)
 - **PR**: #2
 - **Files**: `src/managers/database/adapters/__tests__/drizzle.adapter.test.ts` (create)
 - **Tests**: SQLite :memory: connect, PostgreSQL pool connect, connection failure → DatabaseConnectionError, health with latency, parameterized query, empty query result
@@ -186,7 +186,7 @@ Chain strategy: feature-branch-chain
 - **Estimated lines**: +80
 - **Acceptance**: Full CRUD with typed returns; transaction commit; automatic rollback on error; migration placeholder logs warning
 
-### TASK_020: Barrel exports + npm install + full regression
+### TASK_020: ? Barrel exports + npm install + full regression
 - **PR**: #2
 - **Files**: `src/index.ts` (modify); `package-lock.json` (auto)
 - **Tests**: `npm test` — full suite
