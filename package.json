@@ -38,6 +38,7 @@
     "jose": "^6.0.0",
     "@opentelemetry/api": "^1.9.0",
     "@aws-sdk/client-s3": "^3.700.0",
+    "drizzle-orm": "^0.45.2",
     "opossum": "^8.0.0",
     "i18next": "^24.0.0",
     "@nats-io/nats-core": "^3.0.0",
@@ -54,7 +55,7 @@
     "prettier": "^3.4.0",
     "@types/node": "^22.0.0",
     "supertest": "^7.0.0",
-    "drizzle-orm": "^0.45.2",
+    "@libsql/client": "^0.17.4",
     "@prisma/client": "^6.0.0"
   },
   "engines": {
