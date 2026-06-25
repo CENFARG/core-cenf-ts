@@ -1,13 +1,12 @@
 /**
  * Environment-based configuration adapter.
  *
- * Reads configuration from `process.env` with optional dotenv loading
- * and validates against a Zod schema.
+ * Reads configuration from `process.env` with native `process.loadEnvFile`
+ * (Node >=21.7.0) for `.env` file loading, and validates against a Zod schema.
  *
  * @module managers/config/adapters/env.adapter
  */
 
-import { config as loadDotenv } from 'dotenv';
 import type { ZodSchema } from 'zod';
 import type { IConfigManager } from '../ports.js';
 import type { HealthStatus } from '../../../shared/types.js';
@@ -17,7 +16,8 @@ import { ConfigValidationError } from '../errors.js';
 /**
  * Configuration adapter that reads from environment variables.
  *
- * Uses `dotenv` for `.env` file loading and Zod for schema validation.
+ * Uses native `process.loadEnvFile()` for `.env` file loading
+ * and Zod for schema validation.
  * Runtime overrides via `set()` do NOT mutate `process.env`.
  */
 export class EnvConfigAdapter implements IConfigManager {
@@ -60,11 +60,17 @@ export class EnvConfigAdapter implements IConfigManager {
   }
 
   async reload(): Promise<void> {
-    // Re-read dotenv and merge into process.env (without overriding existing)
-    loadDotenv({
-      path: this.options.dotenvPath,
-      override: this.options.override ?? false,
-    });
+    // Re-read .env using native process.loadEnvFile
+    const envPath = this.options.dotenvPath;
+    try {
+      if (envPath) {
+        process.loadEnvFile(envPath);
+      } else {
+        process.loadEnvFile();
+      }
+    } catch {
+      // File doesn't exist — continue with existing process.env values
+    }
     // Reload store from current process.env, preserving runtime overrides
     const rawEnv = { ...process.env };
     for (const [key, value] of Object.entries(rawEnv)) {
@@ -79,11 +85,17 @@ export class EnvConfigAdapter implements IConfigManager {
   // -----------------------------------------------------------------------
 
   async start(): Promise<void> {
-    // Load dotenv file on start
-    loadDotenv({
-      path: this.options.dotenvPath,
-      override: this.options.override ?? false,
-    });
+    // Load .env file using native process.loadEnvFile (Node >=21.7.0)
+    const envPath = this.options.dotenvPath;
+    try {
+      if (envPath) {
+        process.loadEnvFile(envPath);
+      } else {
+        process.loadEnvFile();
+      }
+    } catch {
+      // File doesn't exist — continue with existing process.env values
+    }
   }
 
   async stop(): Promise<void> {

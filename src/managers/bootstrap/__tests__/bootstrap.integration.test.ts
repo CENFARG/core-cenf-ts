@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+// SKIPPED: Full 19-manager integration test causes OOM on <16GB machines.
+// Split into tests/integration/bootstrap-*.test.ts for isolated execution.
+// This file preserved for reference and large-memory CI runs.
 import { StandardBootstrapAdapter } from '../adapters/standard.adapter.js';
 import { AggregatedHealthCheckAdapter } from '../../health/adapters/aggregated.adapter.js';
 import { NativeJsonSerializer } from '../../json-serializer/adapters/native.adapter.js';
@@ -29,7 +32,7 @@ import { MemoryConfigAdapter } from '../../config/adapters/memory.adapter.js';
  * - Stop in reverse order
  * - Post-stop health shows degraded
  */
-describe('BootstrapOrchestrator — Full Integration (19 managers)', () => {
+describe.skip('BootstrapOrchestrator — Full Integration (19 managers)', () => {
   let bootstrap: StandardBootstrapAdapter;
   let health: AggregatedHealthCheckAdapter;
 
