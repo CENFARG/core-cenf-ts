@@ -198,6 +198,10 @@ export {
   MemoryCacheAdapter,
 } from './managers/cache/adapters/memory.adapter.js';
 export type { MemoryCacheOptions } from './managers/cache/adapters/memory.adapter.js';
+export {
+  RedisCacheAdapter,
+} from './managers/cache/adapters/redis.adapter.js';
+export type { RedisCacheOptions } from './managers/cache/adapters/redis.adapter.js';
 
 // ---------------------------------------------------------------------------
 // FeatureFlagManager
