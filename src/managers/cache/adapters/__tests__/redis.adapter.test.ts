@@ -11,22 +11,53 @@ const {
   mockQuit,
   mockDisconnect,
   mockOn,
+  mockGet,
+  mockSet,
+  mockDel,
+  mockExists,
+  mockKeys,
+  mockSetex,
   mockRedisInstance,
   MockRedis,
 } = vi.hoisted(() => {
   const ping = vi.fn().mockResolvedValue('PONG');
-  const quit = vi.fn().mockResolvedValue('OK');
+  const quitFn = vi.fn().mockResolvedValue('OK');
   const disconnect = vi.fn();
   const on = vi.fn();
+  const get = vi.fn().mockResolvedValue(null);
+  const set = vi.fn().mockResolvedValue('OK');
+  const del = vi.fn().mockResolvedValue(1);
+  const exists = vi.fn().mockResolvedValue(0);
+  const keys = vi.fn().mockResolvedValue([]);
+  const setex = vi.fn().mockResolvedValue('OK');
   const instance = {
     ping,
-    quit,
+    quit: quitFn,
     disconnect,
     on,
+    get,
+    set,
+    del,
+    exists,
+    keys,
+    setex,
     status: 'ready' as string,
   };
   const Redis = vi.fn().mockImplementation(() => instance);
-  return { mockPing: ping, mockQuit: quit, mockDisconnect: disconnect, mockOn: on, mockRedisInstance: instance, MockRedis: Redis };
+  return {
+    mockPing: ping,
+    mockQuit: quitFn,
+    mockDisconnect: disconnect,
+    mockOn: on,
+    mockGet: get,
+    mockSet: set,
+    mockDel: del,
+    mockExists: exists,
+    mockKeys: keys,
+    mockSetex: setex,
+    mockRedisInstance: instance,
+    MockRedis: Redis,
+  };
 });
 
 vi.mock('ioredis', () => ({
@@ -143,5 +174,159 @@ describe('RedisCacheAdapter', () => {
     await adapter.start();
 
     expect(mockOn).toHaveBeenCalledWith('error', expect.any(Function));
+  });
+
+  // -----------------------------------------------------------------------
+  // CRUD operations — set / get
+  // -----------------------------------------------------------------------
+
+  it('set() and get() roundtrip a string value', async () => {
+    mockGet.mockResolvedValue('"hello"');
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.set('key1', 'hello');
+    const result = await adapter.get<string>('key1');
+
+    expect(mockSet).toHaveBeenCalledWith(
+      'core-cenf:cache:key1',
+      '"hello"',
+    );
+    expect(result).toBe('hello');
+  });
+
+  it('set() and get() roundtrip a number', async () => {
+    mockGet.mockResolvedValue('42');
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.set('num', 42);
+    const result = await adapter.get<number>('num');
+
+    expect(result).toBe(42);
+  });
+
+  it('set() and get() roundtrip an object', async () => {
+    const obj = { name: 'test', items: [1, 2, 3] };
+    mockGet.mockResolvedValue(JSON.stringify(obj));
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.set('obj', obj);
+    const result = await adapter.get<typeof obj>('obj');
+
+    expect(result).toEqual(obj);
+  });
+
+  it('get() returns null for missing key', async () => {
+    mockGet.mockResolvedValue(null);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const result = await adapter.get('nonexistent');
+
+    expect(result).toBeNull();
+  });
+
+  // -----------------------------------------------------------------------
+  // TTL / expiration
+  // -----------------------------------------------------------------------
+
+  it('set() with TTL uses setex for expiration', async () => {
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.set('ttl-key', 'temp', 300_000);
+
+    expect(mockSetex).toHaveBeenCalledWith(
+      'core-cenf:cache:ttl-key',
+      300,
+      '"temp"',
+    );
+  });
+
+  it('set() without TTL uses set (no expiry)', async () => {
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.set('forever', 'eternal');
+
+    expect(mockSet).toHaveBeenCalledWith(
+      'core-cenf:cache:forever',
+      '"eternal"',
+    );
+    expect(mockSetex).not.toHaveBeenCalled();
+  });
+
+  it('set() with default TTL uses setex', async () => {
+    adapter = new RedisCacheAdapter({
+      url: 'redis://localhost:6379',
+      defaultTtlMs: 60_000,
+    });
+    await adapter.start();
+
+    await adapter.set('default-ttl', 'value');
+
+    expect(mockSetex).toHaveBeenCalledWith(
+      'core-cenf:cache:default-ttl',
+      60,
+      '"value"',
+    );
+  });
+
+  // -----------------------------------------------------------------------
+  // del / has / clear
+  // -----------------------------------------------------------------------
+
+  it('has() returns true for existing key', async () => {
+    mockExists.mockResolvedValue(1);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const result = await adapter.has('exists');
+
+    expect(result).toBe(true);
+    expect(mockExists).toHaveBeenCalledWith('core-cenf:cache:exists');
+  });
+
+  it('has() returns false for missing key', async () => {
+    mockExists.mockResolvedValue(0);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    const result = await adapter.has('nope');
+
+    expect(result).toBe(false);
+  });
+
+  it('del() removes a key', async () => {
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.del('remove-me');
+
+    expect(mockDel).toHaveBeenCalledWith('core-cenf:cache:remove-me');
+  });
+
+  it('clear() deletes all prefixed keys', async () => {
+    mockKeys.mockResolvedValue(['core-cenf:cache:a', 'core-cenf:cache:b']);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await adapter.clear();
+
+    expect(mockKeys).toHaveBeenCalledWith('core-cenf:cache:*');
+    expect(mockDel).toHaveBeenCalledWith(
+      'core-cenf:cache:a',
+      'core-cenf:cache:b',
+    );
+  });
+
+  it('clear() is safe when no keys exist', async () => {
+    mockKeys.mockResolvedValue([]);
+    adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+    await adapter.start();
+
+    await expect(adapter.clear()).resolves.toBeUndefined();
   });
 });

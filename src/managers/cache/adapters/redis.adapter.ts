@@ -64,15 +64,36 @@ export class RedisCacheAdapter implements CacheManager {
   }
 
   // -----------------------------------------------------------------------
-  // CacheManager — get / set (stubs for now)
+  // CacheManager — get / set / del / has / clear
   // -----------------------------------------------------------------------
 
-  async get<T>(_key: string): Promise<T | null> {
-    return null;
+  async get<T>(key: string): Promise<T | null> {
+    if (!this.redis) return null;
+    try {
+      const raw = await this.redis.get(this.pk(key));
+      if (raw === null) return null;
+      return JSON.parse(raw) as T;
+    } catch {
+      console.warn('[redis-cache] get failed', key);
+      return null;
+    }
   }
 
-  async set<T>(_key: string, _value: T, _ttlMs?: number): Promise<void> {
-    // no-op stub
+  async set<T>(key: string, value: T, ttlMs?: number): Promise<void> {
+    if (!this.redis) return;
+    const effectiveTtl = ttlMs ?? this.defaultTtlMs;
+    const serialized = JSON.stringify(value);
+    const prefixedKey = this.pk(key);
+    try {
+      if (effectiveTtl !== undefined) {
+        const ttlSeconds = Math.ceil(effectiveTtl / 1000);
+        await this.redis.setex(prefixedKey, ttlSeconds, serialized);
+      } else {
+        await this.redis.set(prefixedKey, serialized);
+      }
+    } catch {
+      console.warn('[redis-cache] set failed', key);
+    }
   }
 
   async getOrSet<T>(
@@ -83,16 +104,36 @@ export class RedisCacheAdapter implements CacheManager {
     return factory();
   }
 
-  async del(_key: string): Promise<void> {
-    // no-op stub
+  async del(key: string): Promise<void> {
+    if (!this.redis) return;
+    try {
+      await this.redis.del(this.pk(key));
+    } catch {
+      console.warn('[redis-cache] del failed', key);
+    }
   }
 
-  async has(_key: string): Promise<boolean> {
-    return false;
+  async has(key: string): Promise<boolean> {
+    if (!this.redis) return false;
+    try {
+      const result = await this.redis.exists(this.pk(key));
+      return result === 1;
+    } catch {
+      console.warn('[redis-cache] has failed', key);
+      return false;
+    }
   }
 
   async clear(): Promise<void> {
-    // no-op stub
+    if (!this.redis) return;
+    try {
+      const keys = await this.redis.keys(this.pk('*'));
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+      }
+    } catch {
+      console.warn('[redis-cache] clear failed');
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -135,5 +176,16 @@ export class RedisCacheAdapter implements CacheManager {
         defaultTtlMs: this.defaultTtlMs ?? null,
       },
     };
+  }
+
+  // -----------------------------------------------------------------------
+  // Private helpers
+  // -----------------------------------------------------------------------
+
+  /**
+   * Prefix a cache key with the configured key prefix.
+   */
+  private pk(key: string): string {
+    return `${this.keyPrefix}${key}`;
   }
 }
