@@ -57,6 +57,9 @@ export class MemoryCacheAdapter implements CacheManager {
   private readonly defaultTtlMs: number | undefined;
   private readonly stampedeWindowMs: number;
 
+  /** Single-flight pending getOrSet operations to prevent thundering herd. */
+  private pendingGets = new Map<string, Promise<unknown>>();
+
   constructor(options?: MemoryCacheOptions) {
     this.defaultTtlMs = options?.defaultTtlMs;
     this.stampedeWindowMs = options?.stampedeWindowMs ?? 0;
@@ -93,27 +96,32 @@ export class MemoryCacheAdapter implements CacheManager {
     factory: () => Promise<T>,
     ttlMs?: number,
   ): Promise<T> {
+    // Check for an existing pending operation (single-flight)
+    const pending = this.pendingGets.get(key);
+    if (pending !== undefined) {
+      return pending as Promise<T>;
+    }
+
     const entry = this.store.get(key);
 
-    // Cache miss — compute and store.
-    if (!entry) {
-      return this.computeAndStore<T>(key, factory, ttlMs);
+    // Valid cached value — return it (no factory call needed).
+    if (entry && !this.isExpired(entry) && !this.shouldEarlyRecompute(entry)) {
+      return entry.value as T;
     }
 
-    // Cache hit but expired — recompute.
-    if (this.isExpired(entry)) {
+    // Clean up expired entry
+    if (entry && this.isExpired(entry)) {
       this.store.delete(key);
-      return this.computeAndStore<T>(key, factory, ttlMs);
     }
 
-    // XFetch early recompute: if the entry is within the stampede window
-    // of expiry, trigger an early refresh to prevent thundering herd.
-    if (this.shouldEarlyRecompute(entry)) {
-      return this.computeAndStore<T>(key, factory, ttlMs);
+    // Cache miss or expired or early recompute — compute with single-flight
+    const promise = this.computeAndStore<T>(key, factory, ttlMs);
+    this.pendingGets.set(key, promise);
+    try {
+      return await promise;
+    } finally {
+      this.pendingGets.delete(key);
     }
-
-    // Valid cached value — return it.
-    return entry.value as T;
   }
 
   // -----------------------------------------------------------------------

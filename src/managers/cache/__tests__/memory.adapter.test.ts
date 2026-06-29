@@ -142,6 +142,26 @@ describe('MemoryCacheAdapter', () => {
     expect(factory).toHaveBeenCalledTimes(1);
   });
 
+  it('getOrSet() concurrent calls invoke factory exactly once (single-flight)', async () => {
+    const factory = vi.fn().mockImplementation(
+      () => new Promise<string>((resolve) => setTimeout(() => resolve('computed'), 50)),
+    );
+
+    // Fire 5 concurrent getOrSet calls for the same key
+    const results = await Promise.all([
+      cache.getOrSet('race-key', factory),
+      cache.getOrSet('race-key', factory),
+      cache.getOrSet('race-key', factory),
+      cache.getOrSet('race-key', factory),
+      cache.getOrSet('race-key', factory),
+    ]);
+
+    // All callers receive the same value
+    expect(results).toEqual(['computed', 'computed', 'computed', 'computed', 'computed']);
+    // Factory is called exactly once
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+
   it('getOrSet() with TTL stores value with expiration', async () => {
     const factory = vi.fn().mockResolvedValue('timed');
     await cache.getOrSet('timed-key', factory, 300000);
