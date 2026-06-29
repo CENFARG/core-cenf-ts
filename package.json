@@ -1,7 +1,7 @@
 {
   "name": "core-cenf-ts",
-  "version": "0.1.0",
-  "description": "CENF Core Infrastructure — 17 transversal managers (TypeScript)",
+  "version": "0.2.0",
+  "description": "CENF Core Infrastructure — 19 transversal managers (TypeScript)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

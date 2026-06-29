@@ -137,6 +137,31 @@ describe('MemoryEventBusAdapter', () => {
       ).rejects.toThrow(EventBusConnectionError);
     });
 
+    it('request() rejects when reply handler does not resolve within timeout', async () => {
+      await adapter.reply<string, string>(
+        'slow.topic',
+        () => new Promise<string>(() => {}), // never resolves
+      );
+
+      await expect(
+        adapter.request<string, string>('slow.topic', 'data', 100),
+      ).rejects.toThrow(/timeout/i);
+    }, 5000);
+
+    it('request() uses default timeout of 5000ms when not specified', async () => {
+      await adapter.reply<string, string>(
+        'default-timeout.topic',
+        async (data) => `echo: ${data}`,
+      );
+
+      // Fast handler resolves before default timeout
+      const result = await adapter.request<string, string>(
+        'default-timeout.topic',
+        'hello',
+      );
+      expect(result).toBe('echo: hello');
+    });
+
     it('reply replaces previous handler on same topic', async () => {
       await adapter.reply<string, string>('echo', async () => 'first');
       await adapter.reply<string, string>('echo', async () => 'second');

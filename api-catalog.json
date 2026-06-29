@@ -2,10 +2,10 @@
   "$schema": "./api-catalog.schema.json",
   "$meta": {
     "project": "core-cenf-ts",
-    "version": "0.1.0",
-    "description": "CENF Core Infrastructure — 15 transversal managers (TypeScript)",
+    "version": "0.2.0",
+    "description": "CENF Core Infrastructure — 19 transversal managers (TypeScript)",
     "python_sibling": "github.com/CENFARG/core-cenf-py@v0.1.0",
-    "last_updated": "2026-06-23"
+    "last_updated": "2026-06-29"
   },
   "managers": [
     {
@@ -232,6 +232,63 @@
         { "name": "deserialize", "returns": "T", "params": [{ "name": "json", "type": "string" }, { "name": "options", "type": "DeserializeOptions", "optional": true }] }
       ],
       "errors": ["JsonSerializationError", "JsonDeserializationError"],
+      "dependencies": []
+    },
+    {
+      "id": "secret",
+      "name": "SecretManager",
+      "port": "ISecretManager",
+      "description": "Secure credential management — env vars, vault, or in-memory",
+      "adapters": ["EnvSecretAdapter", "MemorySecretAdapter"],
+      "methods": [
+        { "name": "get", "returns": "Promise<string>", "params": [{ "name": "name", "type": "string" }] },
+        { "name": "set", "returns": "Promise<void>", "params": [{ "name": "name", "type": "string" }, { "name": "value", "type": "string" }] },
+        { "name": "has", "returns": "Promise<boolean>", "params": [{ "name": "name", "type": "string" }] },
+        { "name": "list", "returns": "Promise<string[]>", "params": [] }
+      ],
+      "errors": ["SecretNotFoundError", "SecretError"],
+      "dependencies": []
+    },
+    {
+      "id": "error-handling",
+      "name": "ErrorHandlingManager",
+      "port": "IErrorHandlingManager",
+      "description": "Unified error classification, reporting, and function wrapping",
+      "adapters": ["StandardErrorHandlingAdapter"],
+      "methods": [
+        { "name": "handle", "returns": "ErrorReport", "params": [{ "name": "error", "type": "unknown" }, { "name": "context", "type": "ErrorContext", "optional": true }] },
+        { "name": "wrap", "returns": "T", "params": [{ "name": "fn", "type": "T" }] },
+        { "name": "classify", "returns": "ErrorClassification", "params": [{ "name": "error", "type": "unknown" }] }
+      ],
+      "errors": [],
+      "dependencies": []
+    },
+    {
+      "id": "feature-flag",
+      "name": "FeatureFlagManager",
+      "port": "FeatureFlagManager",
+      "description": "Runtime feature toggles with percentage rollout support",
+      "adapters": ["MemoryFeatureFlagAdapter"],
+      "methods": [
+        { "name": "isEnabled", "returns": "Promise<boolean>", "params": [{ "name": "flag", "type": "string" }] },
+        { "name": "isEnabledForUser", "returns": "Promise<boolean>", "params": [{ "name": "flag", "type": "string" }, { "name": "userId", "type": "string" }] },
+        { "name": "getAllFlags", "returns": "Promise<FeatureFlag[]>", "params": [] }
+      ],
+      "errors": ["FeatureFlagError", "FeatureFlagNotFoundError"],
+      "dependencies": []
+    },
+    {
+      "id": "rate-limiter",
+      "name": "RateLimiterManager",
+      "port": "RateLimiterManager",
+      "description": "Token bucket rate limiting for API throttling",
+      "adapters": ["MemoryRateLimiterAdapter"],
+      "methods": [
+        { "name": "consume", "returns": "Promise<RateLimitResult>", "params": [{ "name": "key", "type": "string" }, { "name": "tokens", "type": "number", "optional": true }] },
+        { "name": "getRemaining", "returns": "Promise<number>", "params": [{ "name": "key", "type": "string" }] },
+        { "name": "reset", "returns": "Promise<void>", "params": [{ "name": "key", "type": "string" }] }
+      ],
+      "errors": ["RateLimitExceededError"],
       "dependencies": []
     }
   ]
