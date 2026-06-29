@@ -146,7 +146,7 @@ export class MemoryEventBusAdapter implements EventBusManager {
   async request<T = unknown, R = unknown>(
     topic: string,
     data: T,
-    _timeoutMs?: number,
+    timeoutMs = 5000,
   ): Promise<R> {
     const handler = this.replyHandlers.get(topic);
     if (!handler) {
@@ -155,7 +155,20 @@ export class MemoryEventBusAdapter implements EventBusManager {
       );
     }
 
-    return (await handler(data)) as R;
+    const result = await Promise.race([
+      handler(data),
+      new Promise<never>((_, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error(`Request timeout after ${timeoutMs}ms for topic: ${topic}`)),
+          timeoutMs,
+        );
+        // Prevent the timer from keeping the process alive
+        if (typeof timer === 'object' && 'unref' in timer) {
+          timer.unref();
+        }
+      }),
+    ]);
+    return result as R;
   }
 
   // -----------------------------------------------------------------------
