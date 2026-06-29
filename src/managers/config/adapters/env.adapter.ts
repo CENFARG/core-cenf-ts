@@ -36,12 +36,9 @@ export class EnvConfigAdapter implements IConfigManager {
     try {
       const raw: Record<string, unknown> = { ...process.env };
       const parsed = schema.parse(raw);
-      // Populate internal store with parsed values (coerced types)
-      this.store = { ...raw };
-      // Override with parsed values for proper types
-      for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
-        this.store[key] = value;
-      }
+      // Only store schema-validated keys — prevents leaking secrets
+      // that exist in process.env but are not part of the config schema.
+      this.store = { ...(parsed as Record<string, unknown>) };
       return parsed;
     } catch (error) {
       throw new ConfigValidationError(
@@ -71,11 +68,11 @@ export class EnvConfigAdapter implements IConfigManager {
     } catch {
       // File doesn't exist — continue with existing process.env values
     }
-    // Reload store from current process.env, preserving runtime overrides
-    const rawEnv = { ...process.env };
-    for (const [key, value] of Object.entries(rawEnv)) {
-      if (!(key in this.store)) {
-        this.store[key] = value;
+    // Reload only updates existing store keys from process.env —
+    // does NOT add new keys that weren't in the original schema.
+    for (const key of Object.keys(this.store)) {
+      if (key in process.env) {
+        this.store[key] = process.env[key];
       }
     }
   }

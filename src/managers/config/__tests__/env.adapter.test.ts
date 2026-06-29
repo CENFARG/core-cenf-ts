@@ -130,6 +130,28 @@ describe('EnvConfigAdapter', () => {
     expect(health.details).toHaveProperty('keysLoaded');
   });
 
+  it('load() does NOT leak non-schema env vars into get() store', async () => {
+    // Set a secret-like env var that is NOT in the schema
+    process.env.SECRET_API_KEY = 'super-secret-value';
+    process.env.DATABASE_PASSWORD = 'db-password-123';
+
+    const adapter = new EnvConfigAdapter();
+    await adapter.load(testSchema);
+
+    // Schema-validated keys should be accessible
+    expect(adapter.get('NODE_ENV')).toBe('test');
+    expect(adapter.get('PORT')).toBe(4000);
+    expect(adapter.get('DATABASE_URL')).toBe('postgres://localhost:5432/test');
+
+    // Non-schema env vars must NOT be accessible via get()
+    expect(adapter.get('SECRET_API_KEY')).toBeUndefined();
+    expect(adapter.get('DATABASE_PASSWORD')).toBeUndefined();
+
+    // Cleanup
+    delete process.env.SECRET_API_KEY;
+    delete process.env.DATABASE_PASSWORD;
+  });
+
   it('accepts custom dotenv path in constructor', () => {
     const options: EnvConfigOptions = { dotenvPath: '/custom/.env' };
     const adapter = new EnvConfigAdapter(options);
