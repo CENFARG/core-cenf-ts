@@ -1,8 +1,11 @@
 /**
- * Audit remediation tests — F1 through F7.
+ * Audit remediation tests — F1 through F15.
  *
  * Each test proves a specific bug from the Gemini audit reports exists,
  * then validates the fix. Tests are organized by fix ID.
+ *
+ * F1-F7: P1 CRITICAL fixes (commit 35b2640)
+ * F8-F15: P2 HIGH + P3 MEDIUM fixes (this batch)
  *
  * @module managers/__tests__/audit-fixes
  */
@@ -363,5 +366,108 @@ describe('F7: Bootstrap self-registration guard', () => {
     // Second start should be idempotent (no-op or throw)
     await bootstrap.start();
     expect(startCount).toBe(1); // Manager NOT started again
+  });
+});
+
+// ---------------------------------------------------------------------------
+// F9: Redis error listener leak — stop() must remove error handler
+// ---------------------------------------------------------------------------
+
+describe('F9: Redis error listener cleanup in stop()', () => {
+  it('stop() removes the error listener registered in start()', async () => {
+    const { RedisCacheAdapter } = await import(
+      '../cache/adapters/redis.adapter.js'
+    );
+
+    const adapter = new RedisCacheAdapter({ url: 'redis://localhost:6379' });
+
+    const offSpy = vi.fn();
+    const onSpy = vi.fn();
+    const mockRedis = {
+      get: vi.fn().mockResolvedValue(null),
+      set: vi.fn().mockResolvedValue('OK'),
+      setex: vi.fn().mockResolvedValue('OK'),
+      del: vi.fn().mockResolvedValue(1),
+      exists: vi.fn().mockResolvedValue(0),
+      keys: vi.fn().mockResolvedValue([]),
+      on: onSpy,
+      off: offSpy,
+      ping: vi.fn().mockResolvedValue('PONG'),
+      quit: vi.fn().mockResolvedValue('OK'),
+      disconnect: vi.fn(),
+    };
+
+    (adapter as unknown as Record<string, unknown>)['redis'] = mockRedis;
+    (adapter as unknown as Record<string, unknown>)['connected'] = true;
+
+    // Simulate what start() does: register error handler
+    const errorHandler = () => { /* noop */ };
+    (adapter as unknown as Record<string, unknown>)['errorHandler'] = errorHandler;
+
+    await adapter.stop();
+
+    // Verify off() was called with the error handler
+    expect(offSpy).toHaveBeenCalledWith('error', errorHandler);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// F11: EventBus request() timeout — must use Promise.race
+// ---------------------------------------------------------------------------
+
+describe('F11: EventBus request() timeout implementation', () => {
+  it('request() rejects with timeout error when handler never resolves', async () => {
+    const { MemoryEventBusAdapter } = await import(
+      '../event-bus/adapters/memory.adapter.js'
+    );
+
+    const adapter = new MemoryEventBusAdapter();
+    await adapter.reply('slow', () => new Promise(() => {})); // never resolves
+
+    await expect(
+      adapter.request('slow', 'data', 100),
+    ).rejects.toThrow(/timeout/i);
+  }, 5000);
+
+  it('request() resolves normally when handler responds within timeout', async () => {
+    const { MemoryEventBusAdapter } = await import(
+      '../event-bus/adapters/memory.adapter.js'
+    );
+
+    const adapter = new MemoryEventBusAdapter();
+    await adapter.reply<string, string>('fast', async (data) => `echo:${data}`);
+
+    const result = await adapter.request<string, string>('fast', 'hello', 1000);
+    expect(result).toBe('echo:hello');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// F15: Config adapter env leak — load() must not store non-schema keys
+// ---------------------------------------------------------------------------
+
+describe('F15: Config adapter env leak prevention', () => {
+  it('load() does not expose non-schema env vars via get()', async () => {
+    const { EnvConfigAdapter } = await import(
+      '../config/adapters/env.adapter.js'
+    );
+    const { z } = await import('zod');
+
+    const originalEnv = { ...process.env };
+    process.env.SECRET_TOKEN = 'should-not-leak';
+    process.env.APP_NAME = 'test-app';
+
+    try {
+      const schema = z.object({ APP_NAME: z.string() });
+      const adapter = new EnvConfigAdapter();
+      await adapter.load(schema);
+
+      // Schema key is accessible
+      expect(adapter.get('APP_NAME')).toBe('test-app');
+      // Non-schema secret must NOT be accessible
+      expect(adapter.get('SECRET_TOKEN')).toBeUndefined();
+    } finally {
+      process.env = originalEnv;
+    }
   });
 });
