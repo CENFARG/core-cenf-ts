@@ -188,6 +188,30 @@ export class StandardErrorHandlingAdapter
     return report;
   }
 
+  /**
+   * Wrap a function with automatic error classification and context enrichment.
+   *
+   * Available for consumer code to decorate any function with centralized
+   * error handling. Both sync and async functions are supported.
+   *
+   * **Current adoption**: Internal adapters use manual try/catch blocks.
+   * Full DI-based `wrap()` adoption across all adapters is planned for v0.3.0,
+   * where `IErrorHandlingManager` will be injected into network-facing adapters
+   * (Redis, S3, Drizzle, HTTP client).
+   *
+   * @example
+   * ```typescript
+   * const errorHandler = new StandardErrorHandlingAdapter();
+   * const safeFetch = errorHandler.wrap(async () => {
+   *   return await fetchExternalApi();
+   * });
+   * // Errors are automatically classified and enriched with context
+   * await safeFetch();
+   * ```
+   *
+   * @param fn - The function to wrap (sync or async).
+   * @returns A wrapped function that classifies errors via `handle()`.
+   */
   wrap<T extends (...args: unknown[]) => unknown>(fn: T): T {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
