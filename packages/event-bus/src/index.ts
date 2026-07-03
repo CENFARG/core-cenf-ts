@@ -13,3 +13,5 @@ export { EVENT_BUS_TYPES_VERSION } from './types.js';
 
 // Adapters
 export { MemoryEventBusAdapter } from './adapters/memory.adapter.js';
+export { NatsEventBusAdapter } from './adapters/nats.adapter.js';
+export type { NatsEventBusOptions, JetStreamStreamConfig } from './adapters/nats.adapter.js';

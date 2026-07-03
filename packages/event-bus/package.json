@@ -21,7 +21,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cenf/core": "workspace:*"
+    "@cenf/core": "workspace:*",
+    "@nats-io/nats-core": "^3.0.0"
   },
   "devDependencies": {
     "tsup": "^8.4.0",
