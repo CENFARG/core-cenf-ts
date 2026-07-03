@@ -46,17 +46,17 @@ export {
 
 // Types — JSON types, Result, HealthStatus, ContextStore
 export type {
-  JsonValue,
   JsonObject,
   Result,
   HealthStatus,
   ContextStore,
   JsonValueBrand,
 } from './types.js';
+// JsonValue exported as both type and runtime value (dual-emit pattern)
 export { JsonValue } from './types.js';
 
 // Lifecycle — AsyncLifecycle interface
-export { AsyncLifecycle, LIFECYCLE_VERSION } from './lifecycle.js';
+export { type AsyncLifecycle, LIFECYCLE_VERSION } from './lifecycle.js';
 
 // Context — AsyncLocalStorage wrapper
 export { runInContext, getContext, setContext } from './context.js';
