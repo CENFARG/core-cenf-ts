@@ -110,6 +110,57 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/bootstrap:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/cache:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+      ioredis:
+        specifier: ^5.5.0
+        version: 5.11.1
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/circuit-breaker:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/config:
     dependencies:
       '@cenf/core':
@@ -141,7 +192,45 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/database:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@libsql/client@0.17.4)(@opentelemetry/api@1.9.1)(@prisma/client@6.19.3(typescript@5.9.3))
+    devDependencies:
+      '@libsql/client':
+        specifier: ^0.17.4
+        version: 0.17.4
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/errors:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/event-bus:
     dependencies:
       '@cenf/core':
         specifier: workspace:*
@@ -174,6 +263,38 @@ importers:
         version: 3.2.6(@types/node@22.20.0)
 
   packages/health:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/http-client:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/i18n:
     dependencies:
       '@cenf/core':
         specifier: workspace:*
@@ -224,8 +345,65 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/observability:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.1
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/rate-limiter:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/secret:
     dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/storage:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.700.0
+        version: 3.1078.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.700.0
+        version: 3.1078.0
       '@cenf/core':
         specifier: workspace:*
         version: link:../core
