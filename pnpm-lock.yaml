@@ -235,6 +235,9 @@ importers:
       '@cenf/core':
         specifier: workspace:*
         version: link:../core
+      '@nats-io/nats-core':
+        specifier: ^3.0.0
+        version: 3.4.0
     devDependencies:
       tsup:
         specifier: ^8.4.0
@@ -386,6 +389,31 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/state-machine:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@cenf/logging':
+        specifier: workspace:*
+        version: link:../logging
+      '@cenf/observability':
+        specifier: workspace:*
+        version: link:../observability
       tsup:
         specifier: ^8.4.0
         version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
