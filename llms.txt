@@ -122,6 +122,15 @@ pnpm test -- --coverage     # With coverage
 - `pnpm-workspace.yaml` — Monorepo workspace
 - `tsconfig.base.json` — Shared TypeScript config
 - `turbo.json` — Turborepo pipeline
+
+## Optional
+
+- [Full Manager Table](AGENTS.md#19-managers) — Complete 19-manager reference
+- [Manager API](AGENTS_API.md) — Structured catalog of all 19 managers
+- [API Catalog](api-catalog.json) — Machine-parseable reference
+- [OpenSpec Config](openspec/config.yaml) — SDD project configuration
+- [CI/CD Pipeline](.github/workflows/ci.yml) — GitHub Actions workflow
+- [Strategic Decisions](.chats/decisions.yaml) — Architecture decisions
 - `vitest.config.ts` — Test configuration
 - `.codegraph/` — Pre-indexed knowledge graph
 - `.chats/decisions.yaml` — Strategic architecture decisions

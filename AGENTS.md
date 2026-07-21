@@ -87,6 +87,94 @@ src/
 - **Commits**: Work-unit commits per SDD convention. Chained PRs for changes over 400 lines.
 - **Python sibling**: Use `core-cenf-py` (v0.1.0) as reference for patterns, error types, and method signatures. Adapt, don't copy — TypeScript idioms differ.
 
+## Installation
+
+```bash
+git clone https://github.com/CENFARG/core-cenf-ts.git
+cd core-cenf-ts
+pnpm install
+pnpm build
+```
+
+## Context Propagation (IMPLICIT)
+
+```typescript
+import { context } from './src/shared/context.js';
+context.run({ correlationId: 'req-123', tenantId: 'cntrs' }, async () => {
+  // All downstream calls inherit context via AsyncLocalStorage
+});
+```
+
+**Rule**: NEVER pass context as function arguments. Always use AsyncLocalStorage.
+
+## Error Taxonomy
+
+```typescript
+import { TransientError, PermanentError, ValidationError, AuthError, RateLimitError } from './src/shared/errors.js';
+// TransientError: retryable (network, deadlock)
+// PermanentError: not retryable (missing resource, invalid config)
+```
+
+## Testing Patterns
+
+```typescript
+// Use in-memory adapters for unit tests
+import { MemoryCacheAdapter } from '@cenf/cache';
+const cache = new MemoryCacheAdapter();
+
+// Use vitest
+import { describe, it, expect } from 'vitest';
+describe('CacheManager', () => {
+  it('returns cached value', async () => {
+    const val = await cache.getOrSet('key', async () => 'value', 60);
+    expect(val).toBe('value');
+  });
+});
+```
+
+## Commit Gate (MANDATORY)
+
+```bash
+pnpm typecheck          # ZERO errors
+pnpm lint               # ZERO errors
+pnpm test               # ALL green (708 tests)
+```
+
+## CI/CD Pipeline
+
+Every push runs:
+1. **Lint + TypeCheck + Test** (ESLint, tsc, vitest)
+2. **Security Scan** (Trivy)
+3. **SBOM Generation** (CycloneDX)
+
+Pipeline: `.github/workflows/ci.yml`
+
+## @ai-directive by Manager
+
+| Manager | @ai-directive |
+|---------|--------------|
+| ConfigManager | Never access `process.env` directly. Use `config.get()`. |
+| LogManager | Use pino child loggers. Mask credentials before logging. |
+| SecretManager | Secrets are never logged. Auto-masked `.toString()`. |
+| ErrorHandlingManager | `@handleErrors()` never swallows — always re-raises. |
+| CacheManager | Cache miss is NOT an error. Use stampede protection. |
+| DatabaseManager | Always use transactions. Never raw sessions. |
+| StorageManager | Never infer MIME type from extension. |
+| HttpClientManager | Circuit breaker protects by host. Timeouts mandatory. |
+| EventBusManager | `publish()` is fire-and-forget. Exact-match subscriptions. |
+| RateLimiterManager | Use `isAllowed()` before any rate-limited operation. |
+| BootstrapOrchestrator | `startup()` → `waitForSignal()` → `shutdown()`. Strict order. |
+
+## Anti-Patterns
+
+| ❌ Wrong | ✅ Right |
+|----------|---------|
+| Import adapter directly | Import port (interface) |
+| `process.env.DB_HOST` | `config.get('db.host')` |
+| Pass context as args | AsyncLocalStorage (implicit) |
+| Log raw secrets | Auto-masked `.toString()` |
+| Skip commit gate | Always `typecheck + lint + test` |
+
 ## Quick Start
 
 ```bash
@@ -103,3 +191,4 @@ npm test
 - `api-catalog.json` — Machine-parseable API reference
 - `openspec/config.yaml` — SDD project configuration
 - CodeGraph: `.codegraph/` — Pre-indexed knowledge graph (auto-synced)
+- LLM-optimized index: `llms.txt`
