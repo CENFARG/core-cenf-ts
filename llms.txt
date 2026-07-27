@@ -1,0 +1,136 @@
+# core-cenf-ts
+
+> TypeScript port of core-cenf-py. 19 infrastructure managers. Clean Architecture (Ports & Adapters). 708 tests.
+
+## Quick Start
+
+```bash
+git clone https://github.com/CENFARG/core-cenf-ts.git
+cd core-cenf-ts
+pnpm install
+pnpm build
+pnpm test           # 708 tests
+pnpm typecheck
+pnpm lint
+```
+
+## Architecture Principle
+
+> Depend on Protocols, inject Adapters. Never import adapters in business logic.
+
+```typescript
+// CORRECT — depend on port (interface)
+import type { CacheManager } from './ports/cache-manager.port.js';
+
+// WRONG — avoid direct adapter imports
+import { RedisCacheAdapter } from '../infrastructure/cache/redis-cache.adapter.js';
+```
+
+## 19 Managers
+
+| # | Manager | Port | Adapter | Python Sibling |
+|---|---------|------|---------|---------------|
+| 1 | Config | `ConfigManager` | Zod schema / typed env | M01 ConfigManager |
+| 2 | Logging | `LogManager` | pino | M02 LoggerManager |
+| 3 | Secret | `SecretManager` | env / vault / memory | M03 SecretManager |
+| 4 | ErrorHandling | `ErrorHandlingManager` | @handle_errors decorator | M04 ErrorHandlingManager |
+| 5 | Validation | `ValidationManager` | Zod | M12 FeatureFlagManager |
+| 6 | Observability | `ObservabilityManager` | @opentelemetry/api | M05 ObservabilityManager |
+| 7 | Auth | `AuthManager` | jose (JWT) | M06 AuthManager |
+| 8 | Cache | `CacheManager` | ioredis (Redis) | M07 CacheManager |
+| 9 | FeatureFlag | `FeatureFlagManager` | YAML / memory | M12 |
+| 10 | RateLimiter | `RateLimiterManager` | Token bucket (zero deps) | M16 RateLimiterManager |
+| 11 | Database | `DatabaseManager` | Drizzle / Prisma | M08 DatabaseManager |
+| 12 | Storage | `StorageManager` | @aws-sdk/client-s3 | M09 FileStorageManager |
+| 13 | HttpClient | `HttpClientManager` | undici + retry | M11 ExternalAPIManager |
+| 14 | CircuitBreaker | `CircuitBreakerManager` | opossum | — |
+| 15 | EventBus | `EventBusManager` | @nats-io/nats-core v3 | M21 BusEventManager |
+| 16 | I18n | `I18nManager` | i18next | M17 I18nManager |
+| 17 | JsonSerializer | `JsonSerializer` | Native BigInt-safe JSON | — |
+| 18 | Health | `HealthManager` | Aggregated health checks | — |
+| 19 | Bootstrap | `BootstrapOrchestrator` | Lifecycle wiring | BootstrapOrchestrator |
+
+## File Structure
+
+```
+src/
+├── index.ts                     Public API exports
+├── managers/
+│   ├── config/                  M01 — Zod-typed config
+│   ├── logging/                 M02 — pino logger
+│   ├── secret/                  M03 — Encrypted secrets
+│   ├── error-handling/          M04 — Error classification
+│   ├── validation/              M05 — Zod validation
+│   ├── observability/           M06 — OpenTelemetry
+│   ├── auth/                    M07 — JWT auth (jose)
+│   ├── cache/                   M08 — Redis cache (ioredis)
+│   ├── feature-flag/            M09 — Runtime toggles
+│   ├── rate-limiter/            M10 — Token bucket
+│   ├── database/                M11 — Drizzle/Prisma
+│   ├── storage/                 M12 — S3 storage
+│   ├── http-client/             M13 — undici+retry
+│   ├── circuit-breaker/         M14 — opossum
+│   ├── event-bus/               M15 — NATS JetStream
+│   ├── i18n/                    M16 — i18next
+│   ├── json-serializer/         M17 — BigInt-safe JSON
+│   ├── health/                  M18 — Health checks
+│   └── bootstrap/               M19 — Lifecycle orchestration
+└── shared/
+    ├── errors.ts                CenfError hierarchy
+    ├── types.ts                 Shared types
+    ├── context.ts               AsyncLocalStorage wrapper
+    └── lifecycle.ts             AsyncLifecycle interface
+```
+
+## @ai-directive (Agent Instructions)
+
+- **TDD strict**: Write test first. Always.
+- **Port/Adapter**: Every manager starts with a port interface.
+- **Clean Architecture**: Domain logic never depends on infrastructure.
+- **Testing**: vitest (unit + integration + e2e)
+- **Commits**: Work-unit commits. Chained PRs for >400 lines.
+- **Python sibling**: Use core-cenf-py as pattern reference. Adapt, don't copy.
+
+## Error Taxonomy
+
+```typescript
+import { TransientError, PermanentError, ValidationError, AuthError, RateLimitError } from './shared/errors.js';
+```
+
+## Context Propagation
+
+```typescript
+import { context } from './shared/context.js';
+context.run({ correlationId: 'req-123', tenantId: 'cntrs' }, async () => {
+  // All downstream calls inherit context via AsyncLocalStorage
+});
+```
+
+## Testing
+
+```bash
+pnpm test                    # 708 tests
+pnpm test -- --coverage     # With coverage
+```
+
+## Key Files
+
+- `AGENTS.md` — Full agent instructions (105 lines)
+- `AGENTS_API.md` — Structured catalog of all 19 managers
+- `api-catalog.json` — Machine-parseable API reference
+- `package.json` — Workspace config, scripts
+- `pnpm-workspace.yaml` — Monorepo workspace
+- `tsconfig.base.json` — Shared TypeScript config
+- `turbo.json` — Turborepo pipeline
+
+## Optional
+
+- [Full Manager Table](AGENTS.md#19-managers) — Complete 19-manager reference
+- [Manager API](AGENTS_API.md) — Structured catalog of all 19 managers
+- [API Catalog](api-catalog.json) — Machine-parseable reference
+- [OpenSpec Config](openspec/config.yaml) — SDD project configuration
+- [CI/CD Pipeline](.github/workflows/ci.yml) — GitHub Actions workflow
+- [Strategic Decisions](.chats/decisions.yaml) — Architecture decisions
+- `vitest.config.ts` — Test configuration
+- `.codegraph/` — Pre-indexed knowledge graph
+- `.chats/decisions.yaml` — Strategic architecture decisions

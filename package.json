@@ -1,6 +1,7 @@
 {
   "name": "core-cenf-ts",
   "version": "0.2.0",
+  "private": true,
   "description": "CENF Core Infrastructure — 19 transversal managers (TypeScript)",
   "type": "module",
   "main": "dist/index.js",
@@ -46,16 +47,18 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "@eslint/js": "^9.0.0",
     "@libsql/client": "^0.17.4",
     "@prisma/client": "^6.0.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^3.0.0",
     "eslint": "^9.0.0",
+    "pnpm": "^10.0.0",
     "prettier": "^3.4.0",
     "supertest": "^7.0.0",
-    "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "tsup": "^8.4.0",
+    "turbo": "^2.3.0",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.0.0",
     "vitest": "^3.0.0"
