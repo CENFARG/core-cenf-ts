@@ -91,6 +91,22 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/alert:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/auth:
     dependencies:
       '@cenf/core':
@@ -214,6 +230,38 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/dependency:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/dynamic-prompting:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/errors:
     dependencies:
       '@cenf/core':
@@ -250,6 +298,22 @@ importers:
         version: 3.2.6(@types/node@22.20.0)
 
   packages/feature-flags:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/file-reader:
     dependencies:
       '@cenf/core':
         specifier: workspace:*
@@ -329,6 +393,22 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)
 
+  packages/licence:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
   packages/logging:
     dependencies:
       '@cenf/core':
@@ -356,6 +436,22 @@ importers:
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.1
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/permission:
+    dependencies:
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       tsup:
         specifier: ^8.4.0
@@ -432,6 +528,22 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.700.0
         version: 3.1078.0
+      '@cenf/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)
+
+  packages/taskqueue:
+    dependencies:
       '@cenf/core':
         specifier: workspace:*
         version: link:../core
