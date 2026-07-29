@@ -126,7 +126,7 @@ export class GitHubIssueAdapter {
 
       if (response.status >= 400) {
         const errorBody = (await response.json()) as Record<string, unknown>;
-        const errorMsg = String(errorBody.message ?? `HTTP ${response.status}`);
+        const errorMsg = String(errorBody['message'] ?? `HTTP ${response.status}`);
         return {
           success: false,
           target: 'github',
