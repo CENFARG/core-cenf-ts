@@ -249,3 +249,27 @@ export class JsonDeserializationError extends CenfError {
 export class HealthCheckTimeoutError extends CenfError {
   readonly code = 'ERR_HEALTH_CHECK_TIMEOUT';
 }
+
+// ---------------------------------------------------------------------------
+// Update errors (PR #7 — @cenf/update)
+// ---------------------------------------------------------------------------
+
+/** Update check failed (network, endpoint, or version comparison error). */
+export class UpdateCheckError extends CenfError {
+  readonly code = 'ERR_UPDATE_CHECK';
+}
+
+/** Artifact download or verification (hash/signature) failure. */
+export class UpdateDownloadError extends CenfError {
+  readonly code = 'ERR_UPDATE_DOWNLOAD';
+}
+
+/** Update application or installation failure. */
+export class UpdateApplyError extends CenfError {
+  readonly code = 'ERR_UPDATE_APPLY';
+}
+
+/** Rollback to previous version failed. */
+export class UpdateRollbackError extends CenfError {
+  readonly code = 'ERR_UPDATE_ROLLBACK';
+}

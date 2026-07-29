@@ -42,6 +42,10 @@ export {
   JsonSerializationError,
   JsonDeserializationError,
   HealthCheckTimeoutError,
+  UpdateCheckError,
+  UpdateDownloadError,
+  UpdateApplyError,
+  UpdateRollbackError,
 } from './errors.js';
 
 // Types — JSON types, Result, HealthStatus, ContextStore

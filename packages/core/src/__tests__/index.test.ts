@@ -40,6 +40,10 @@ import {
   JsonSerializationError,
   JsonDeserializationError,
   HealthCheckTimeoutError,
+  UpdateCheckError,
+  UpdateDownloadError,
+  UpdateApplyError,
+  UpdateRollbackError,
   // Types (runtime)
   JsonValue,
   // Lifecycle
@@ -90,6 +94,10 @@ describe('@cenf/core barrel exports', () => {
     expect(JsonSerializationError).toBeDefined();
     expect(JsonDeserializationError).toBeDefined();
     expect(HealthCheckTimeoutError).toBeDefined();
+    expect(UpdateCheckError).toBeDefined();
+    expect(UpdateDownloadError).toBeDefined();
+    expect(UpdateApplyError).toBeDefined();
+    expect(UpdateRollbackError).toBeDefined();
   });
 
   it('exports runtime type brand', () => {
