@@ -29,6 +29,9 @@ import {
   JsonSerializationError,
   JsonDeserializationError,
   HealthCheckTimeoutError,
+  MaintenanceError,
+  ErrorReportFailedError,
+  TelemetryFailedError,
 } from '../errors.js';
 
 const ALL_ERROR_CLASSES = [
@@ -60,6 +63,9 @@ const ALL_ERROR_CLASSES = [
   JsonSerializationError,
   JsonDeserializationError,
   HealthCheckTimeoutError,
+  MaintenanceError,
+  ErrorReportFailedError,
+  TelemetryFailedError,
 ] as const;
 
 describe('CenfError hierarchy', () => {

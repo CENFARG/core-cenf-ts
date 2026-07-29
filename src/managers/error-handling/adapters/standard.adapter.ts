@@ -95,6 +95,11 @@ const CLASSIFICATION_MAP: Record<string, ClassificationRule> = {
 
   // Logging configuration — server category
   ERR_LOG_CONFIGURATION: { category: 'server', retryable: false },
+
+  // Maintenance / error-reporting — server category
+  ERR_MAINTENANCE: { category: 'server', retryable: false },
+  ERR_ERROR_REPORT_FAILED: { category: 'server', retryable: false },
+  ERR_TELEMETRY_FAILED: { category: 'server', retryable: false },
 };
 
 const DEFAULT_CLASSIFICATION: ClassificationRule = {

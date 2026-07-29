@@ -46,6 +46,9 @@ export {
   JsonSerializationError,
   JsonDeserializationError,
   HealthCheckTimeoutError,
+  MaintenanceError,
+  ErrorReportFailedError,
+  TelemetryFailedError,
 } from './shared/errors.js';
 
 // ---------------------------------------------------------------------------

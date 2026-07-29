@@ -249,3 +249,22 @@ export class JsonDeserializationError extends CenfError {
 export class HealthCheckTimeoutError extends CenfError {
   readonly code = 'ERR_HEALTH_CHECK_TIMEOUT';
 }
+
+// ---------------------------------------------------------------------------
+// Maintenance / error-reporting errors (Batch 4)
+// ---------------------------------------------------------------------------
+
+/** Generic maintenance / error-reporting failure. */
+export class MaintenanceError extends CenfError {
+  readonly code = 'ERR_MAINTENANCE';
+}
+
+/** Error report transport failed (all adapters). */
+export class ErrorReportFailedError extends CenfError {
+  readonly code = 'ERR_ERROR_REPORT_FAILED';
+}
+
+/** Telemetry send failure (fire-and-forget but still monitored). */
+export class TelemetryFailedError extends CenfError {
+  readonly code = 'ERR_TELEMETRY_FAILED';
+}
