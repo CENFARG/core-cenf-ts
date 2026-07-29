@@ -256,9 +256,8 @@ export class AndroidUpdateAdapter implements UpdateManager {
 
     // Extract version from artifact URL or bump from current
     const match = artifact.url.match(/(\d+\.\d+\.\d+)/);
-    const newVersion = match
-      ? match[1]
-      : this.bumpPatch(await this.getCurrentVersion(appId));
+    const versionFromUrl = match?.[1];
+    const newVersion = versionFromUrl ?? this.bumpPatch(await this.getCurrentVersion(appId));
 
     this.currentVersions.set(appId, newVersion);
     return { success: true, newVersion };

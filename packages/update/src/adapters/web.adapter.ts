@@ -19,6 +19,7 @@ import type {
 } from '../types.js';
 import {
   UpdateApplyError,
+  UpdateDownloadError,
   UpdateRollbackError,
 } from '@cenf/core';
 import type { HealthStatus } from '@cenf/core';
@@ -195,6 +196,12 @@ export class WebUpdateAdapter implements UpdateManager {
     const selected =
       release.artifacts.find((a) => a.platform === 'web') ??
       release.artifacts[0];
+
+    if (!selected) {
+      throw new UpdateDownloadError(
+        `No artifacts found in release ${release.version}`,
+      );
+    }
 
     return selected;
   }

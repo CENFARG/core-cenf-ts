@@ -86,10 +86,10 @@ class ReleaseWrapper implements AvailableRelease {
     this.artifacts = meta.artifacts.map((a) => new ArtifactWrapper(a));
     this.metadata = {};
     if (meta.release_notes_url) {
-      this.metadata.releaseNotesUrl = meta.release_notes_url;
+      this.metadata['releaseNotesUrl'] = meta.release_notes_url;
     }
     if (meta.min_version) {
-      this.metadata.minVersion = meta.min_version;
+      this.metadata['minVersion'] = meta.min_version;
     }
   }
 }

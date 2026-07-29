@@ -68,7 +68,8 @@ function bumpPatch(v: string): string {
  */
 function extractVersionFromUrl(url: string): string | null {
   const match = url.match(/(\d+\.\d+\.\d+)/);
-  return match ? match[1] : null;
+  const version = match?.[1];
+  return version ?? null;
 }
 
 function detectPlatform(): string {
